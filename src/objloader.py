@@ -1,6 +1,7 @@
 import os
 import pygame
 from OpenGL.GL import *
+import numpy as np
 
 
 class OBJ:
@@ -89,6 +90,8 @@ class OBJ:
         if self.generate_on_init:
             self.generate()
 
+        self.position = np.array([0.0, 0.0, 0.0])
+
     def generate(self):
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
@@ -117,7 +120,10 @@ class OBJ:
         glEndList()
 
     def render(self):
+        glPushMatrix()  # Save the current transformation state
+        glTranslatef(*self.position)  # Apply the object's translation
         glCallList(self.gl_list)
+        glPopMatrix()  # Restore the previous transformation state
 
     def free(self):
         glDeleteLists([self.gl_list])

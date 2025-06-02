@@ -1,24 +1,20 @@
 import sys
-import pygame
 from pygame.locals import *
-from OpenGL.GL import *
-from OpenGL.GLU import *
-import numpy as np
+from enemy import *
 
 # IMPORT OBJECT LOADER
 from objloader import *
-from util import init_graphics
+from src.transformations import apply_cam_transforms
+from graphics import init_graphics
 
 init_graphics()
 
 # LOAD OBJECT AFTER PYGAME INIT
-objects = []
-objects.append(OBJ("assets/Cube.obj", swapyz=True))
-objects.append(OBJ("assets/Sphere.obj", swapyz=True))
+enemies = [Enemy("assets/Cube.obj", [0.0, 0.0, 0.0], swapyz=True), Enemy("assets/Sphere.obj", [0.0, 10.0, 0.0], swapyz=True)]
 
 # Generating all the objects
-for obj in objects:
-    obj.generate()
+for enemy in enemies:
+    enemy.generate()
 
 # Initiating game clock
 clock = pygame.time.Clock()
@@ -93,14 +89,12 @@ while True:
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
-    # Apply camera transformations
-    glRotatef(-ry, 1, 0, 0)
-    glRotatef(-rx, 0, 1, 0)
-    glTranslatef(-cam_pos[0], -cam_pos[1], -cam_pos[2])
+    apply_cam_transforms(rx, ry, cam_pos)
 
     # Render objects
-    for obj in objects:
-        obj.render()
+    for enemy in enemies:
+        enemy.move_to_target(cam_pos, dt)
+        enemy.render()
 
     pygame.display.flip()
 
