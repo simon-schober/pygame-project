@@ -15,7 +15,6 @@ enemy_move_speed = 1.0
 player_gravity = 1.0
 move_speed = 1.0
 pan_speed = 1.0
-
 init_graphics()
 
 # LOAD OBJECT AFTER PYGAME INIT
