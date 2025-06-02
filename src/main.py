@@ -29,7 +29,7 @@ glMatrixMode(GL_MODELVIEW)
 # Initialize camera position and orientation
 cam_pos = np.array([0.0, 0.0, 5.0])
 rx, ry = 0.0, 0.0
-rotate = False
+# rotate = False
 
 # Movement parameters
 move_speed = 0.1
@@ -43,17 +43,19 @@ while True:
             sys.exit()
         elif e.type == KEYDOWN and e.key == K_ESCAPE:
             sys.exit()
-        elif e.type == MOUSEBUTTONDOWN:
-            if e.button == 1:
-                rotate = True
-        elif e.type == MOUSEBUTTONUP:
-            if e.button == 1:
-                rotate = False
+        # elif e.type == MOUSEBUTTONDOWN:
+        #     if e.button == 1:
+        #         rotate = True
+        # elif e.type == MOUSEBUTTONUP:
+        #     if e.button == 1:
+        #         rotate = False
         elif e.type == MOUSEMOTION:
             dx, dy = e.rel
-            if rotate:
-                rx -= dx
-                ry -= dy
+            # if rotate:
+            #     rx -= dx
+            #     ry -= dy
+            rx -= dx
+            ry -= dy
 
     # Handle keyboard input for movement
     keys = pygame.key.get_pressed()
