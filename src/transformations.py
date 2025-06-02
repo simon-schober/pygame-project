@@ -13,6 +13,7 @@ def apply_cam_transforms(rx, ry, cam_pos):
 def compute_cam_direction(rx, ry):
     yaw_rad = np.radians(rx)
     pitch_rad = np.radians(ry)
+
     # Compute direction vector
     direction = np.array([
         np.cos(pitch_rad) * np.sin(yaw_rad),
@@ -20,6 +21,7 @@ def compute_cam_direction(rx, ry):
         np.cos(pitch_rad) * np.cos(yaw_rad)
     ])
     direction = direction / np.linalg.norm(direction)
+
     # Compute right and up vectors
     up = np.array([0.0, 1.0, 0.0])
     right = np.cross(direction, up)
@@ -27,11 +29,12 @@ def compute_cam_direction(rx, ry):
     return direction, right, up
 
 
-def apply_transformations(cam_pos, dt, rx, ry):
+def apply_transformations(cam_pos, rx, ry):
     # Clear buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
+
     # Apply camera transformations
-    glRotatef(-ry * dt, 1, 0, 0)
-    glRotatef(-rx * dt, 0, 1, 0)
-    glTranslatef(-cam_pos[0] * dt, -cam_pos[1] * dt, -cam_pos[2] * dt)
+    glRotatef(-ry, 1, 0, 0)
+    glRotatef(-rx, 0, 1, 0)
+    glTranslatef(-cam_pos[0], -cam_pos[1], -cam_pos[2])
