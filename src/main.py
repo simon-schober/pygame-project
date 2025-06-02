@@ -1,12 +1,6 @@
-#!/usr/bin/env python
-# Basic OBJ file viewer. needs objloader from:
-#  http://www.pygame.org/wiki/OBJFileLoader
-# LMB + move: rotate
-# RMB + move: pan
-# Scroll wheel: zoom in/out
-import sys, pygame
+import sys
+import pygame
 from pygame.locals import *
-from pygame.constants import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
@@ -22,9 +16,6 @@ objects = []
 objects.append(OBJ("assets/Cube.obj", swapyz=True))
 objects.append(OBJ("assets/Sphere.obj", swapyz=True))
 
-positions = []
-positions.append(())
-
 # Generating all the objects
 for obj in objects:
     obj.generate()
@@ -32,15 +23,20 @@ for obj in objects:
 # Initiating game clock
 clock = pygame.time.Clock()
 
-# Switching to editing the model view matrix, which edits the relative position of models to the camera
+# Switching to editing the model view matrix
 glMatrixMode(GL_MODELVIEW)
 
 # Initialize camera position and orientation
 cam_pos = np.array([0.0, 0.0, 5.0])
 rx, ry = 0.0, 0.0
-rotate = move = False
+rotate = False
+
+# Movement parameters
+move_speed = 0.1
 
 while True:
+    dt = clock.tick(60) / 1000.0  # Delta time in seconds
+
     # Event handling
     for e in pygame.event.get():
         if e.type == QUIT:
@@ -50,42 +46,46 @@ while True:
         elif e.type == MOUSEBUTTONDOWN:
             if e.button == 1:
                 rotate = True
-            elif e.button == 3:
-                move = True
         elif e.type == MOUSEBUTTONUP:
             if e.button == 1:
                 rotate = False
-            elif e.button == 3:
-                move = False
         elif e.type == MOUSEMOTION:
             dx, dy = e.rel
             if rotate:
-                rx += dx
-                ry += dy
-            if move:
-                # Convert angles to radians
-                yaw_rad = np.radians(rx)
-                pitch_rad = np.radians(ry)
+                rx -= dx
+                ry -= dy
 
-                # Compute direction vector
-                direction = np.array([
-                    np.cos(pitch_rad) * np.sin(yaw_rad),
-                    np.sin(pitch_rad),
-                    np.cos(pitch_rad) * np.cos(yaw_rad)
-                ])
-                direction = direction / np.linalg.norm(direction)
+    # Handle keyboard input for movement
+    keys = pygame.key.get_pressed()
+    yaw_rad = np.radians(rx)
+    pitch_rad = np.radians(ry)
 
-                # Compute right and up vectors
-                up = np.array([0.0, 1.0, 0.0])
-                right = np.cross(direction, up)
-                right = right / np.linalg.norm(right)
-                up = np.cross(right, direction)
-                up = up / np.linalg.norm(up)
+    # Compute direction vector
+    direction = np.array([
+        np.cos(pitch_rad) * np.sin(yaw_rad),
+        np.sin(pitch_rad),
+        np.cos(pitch_rad) * np.cos(yaw_rad)
+    ])
+    direction = direction / np.linalg.norm(direction)
 
-                # Adjust camera position
-                pan_speed = 0.05
-                cam_pos += -right * dx * pan_speed
-                cam_pos += up * dy * pan_speed
+    # Compute right and up vectors
+    up = np.array([0.0, 1.0, 0.0])
+    right = np.cross(direction, up)
+    right = right / np.linalg.norm(right)
+
+    # Movement
+    if keys[K_s]:
+        cam_pos += direction * move_speed
+    if keys[K_w]:
+        cam_pos -= direction * move_speed
+    if keys[K_d]:
+        cam_pos -= right * move_speed
+    if keys[K_a]:
+        cam_pos += right * move_speed
+    if keys[K_SPACE]:
+        cam_pos += up * move_speed
+    if keys[K_LSHIFT]:
+        cam_pos -= up * move_speed
 
     # Clear buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -101,4 +101,4 @@ while True:
         obj.render()
 
     pygame.display.flip()
-    clock.tick(60)
+
