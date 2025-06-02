@@ -17,11 +17,18 @@ from util import init_graphics
 init_graphics()
 
 # LOAD OBJECT AFTER PYGAME INIT
-obj = OBJ(sys.argv[1], swapyz=True)
-obj.generate()
+objects = []
+objects.append(OBJ("assets/Cube.obj", swapyz=True))
+objects.append(OBJ("assets/Sphere.obj", swapyz=True))
 
+# Generating all the objects
+for obj in objects:
+    obj.generate()
+
+# Initiating game clock
 clock = pygame.time.Clock()
 
+# Switching to editing the model view matrix, which edits the relative position of models to the camera
 glMatrixMode(GL_MODELVIEW)
 
 rx, ry = (0,0)
@@ -59,6 +66,8 @@ while 1:
     glTranslate(tx/20., ty/20., - zpos)
     glRotate(ry, 1, 0, 0)
     glRotate(rx, 0, 1, 0)
-    obj.render()
+
+    for obj in objects:
+        obj.render()
 
     pygame.display.flip()
