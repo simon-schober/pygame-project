@@ -18,8 +18,7 @@ pan_speed = 1.0
 init_graphics()
 
 # LOAD OBJECT AFTER PYGAME INIT
-enemies = [Enemy("assets/Cube.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity),
-           Enemy("assets/Sphere.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
+enemies = [Enemy("assets/Enemy.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
 
 objects = [Object("assets/Plane.obj", [0.0, 0.0, 10.0])]
 
