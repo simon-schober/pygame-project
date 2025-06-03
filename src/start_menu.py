@@ -1,7 +1,7 @@
 import pygame
 import sys
 
-def make_start_menu(Game_name):
+def make_start_menu(Game_name, option_lines, credits_lines):
     pygame.init()
     pygame.font.init()
 
@@ -18,6 +18,7 @@ def make_start_menu(Game_name):
     pygame.transform.scale(start_bg_picture, (int(screen_width * 0.27), int(screen_height * 0.27)))
 
     def Buttons(screen_width):
+        #Make all the Buttons
         def play_button():
             button = pygame.image.load(r'assets\StartMenu\Buttons\play.png')
             return scale_button(button)
@@ -76,36 +77,23 @@ def make_start_menu(Game_name):
 
     buttons = [play_button, option_button, quit_button, credits_button] = Buttons(screen_width)
 
-    def option_menu(screen, screen_width, screen_height):
+    def option_menu(screen, screen_width, screen_height, option_lines):
             pygame.font.init()
+            #make the text to the correct size
             font = pygame.font.Font(None, int((70//(screen_height*0.00078125))/2))
-            option_lines = [
-                "Optins:",
-                "",
-                "Bewegen: ",
-                "W          -->     Move vorward",
-                "A          -->     Move Left",
-                "S          -->     Move Backwards",
-                "D          -->     Move Right",
-                "Move Mous  -->     Rotate your Cracter",
-                "Left Klick -->     Shoot with Gun"
-                "",
-                "You can`t change the Keybinds",
-                "",
-                "Press Arrow-Down-Key To go back to the menu"
-            ]
-            running = True
-            y_start = 50
-            line_height = 40
-                
+            running_options = True
+            #Load the bg immage      
             menu_bg_picture = pygame.image.load(r"assets\StartMenu\Stone_Texture\Black_Stone.jpg")
+            #scale the bg immage to the correct size
             pygame.transform.scale(menu_bg_picture, (int(screen_width * 0.27), int(screen_height * 0.27)))
-            while running:
+            while running_options:
                 screen.blit(menu_bg_picture, (0, 0))
 
                 for i in range(len(option_lines)):
-                    text_surface = font.render(option_lines[i], True, (255, 255, 255))
-                    text_rect = text_surface.get_rect(center=(screen_width // 2, y_start + i * line_height))
+                    text_surface = font.render(option_lines[i], False, (255, 255, 255))
+                    #set the center of the text to the center
+                    text_rect = text_surface.get_rect(center=(screen_width // 2, 50 + i * 40))
+                    #show the text
                     screen.blit(text_surface, text_rect)
                 
                 pygame.display.flip()
@@ -116,54 +104,43 @@ def make_start_menu(Game_name):
                         sys.exit()
                     if event.type == pygame.KEYUP:
                         if event.key == pygame.K_DOWN:
-                            running = False
+                            running_options = False
+                            return True
 
-    def credits_menu(screen, screen_width, screen_height):
+    def credits_menu(screen, screen_width, screen_height, credits_lines):
         pygame.font.init()
-        credits_lines = [
-            "Credits:",
-            "",
-            "Programmierung: ",
-            "Alexander Sief & Simon Schober",
-            "Grafik: ",
-            "   Vladimir Kandalintsev",
-            "Sound: ",
-            "   Simon Schober",
-            "",
-            "♥ Thx for playing our Game ♥",
-            "",
-            "Press Arrow-Down-Key To go back to the menu"
-        ]
-        running = True
-        y_start = 50
-        line_height = 40
+        running_credits = True
             
         menu_bg_picture = pygame.image.load(r"assets\StartMenu\Stone_Texture\Black_Stone.jpg")
+        #Scales the text to the correct size
         pygame.transform.scale(menu_bg_picture, (int(screen_width * 0.27), int(screen_height * 0.27)))
+        #make two differnt text states with the correct text size
         font_normal = pygame.font.Font(None, int((70//(screen_height*0.00078125))/2))
         font_bold_underline = pygame.font.Font(None, int((75//(screen_height*0.00078125))/2))
+        # set the secont font to underline and bold
         font_bold_underline.set_bold(True)
         font_bold_underline.set_underline(True)
-        while running:
+
+        while running_credits:
             screen.blit(menu_bg_picture, (0, 0))
 
+            #make it so that every second text is boold and underlined
             for i in range(len(credits_lines)):
                 if i % 2 == 0:
                     text_surface = font_bold_underline.render(credits_lines[i], True, (255, 255, 255))
                 else:
                     text_surface = font_normal.render(credits_lines[i], True, (255, 255, 255))
-                text_rect = text_surface.get_rect(center=(screen_width // 2, y_start + i * line_height))
+                #set the text to the center and move it down
+                text_rect = text_surface.get_rect(center=(screen_width // 2, 50 + i * 40))
                 screen.blit(text_surface, text_rect)
             
             pygame.display.flip()
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_DOWN:
-                        running = False
+                        running_credits = False
+                        return True
 
 
     # Main loop
@@ -194,15 +171,20 @@ def make_start_menu(Game_name):
                 mouse = pygame.mouse.get_pos()
                 for i in range(len(buttons)):
                     button = buttons[i]
+                    #geht the x and y cord of the button
                     x = (screen_width - button.get_width()) // 2
                     y = int(screen_height * 0.6 + i * screen_height * 0.17) - 350
+                    #whatch if the curor klicked the button
                     if x <= mouse[0] <= x + button.get_width() and y <= mouse[1] <= y + button.get_height():
                         if button == buttons[0]:
+                            #Play
                             running = False
-                        if button == buttons[1]:
-                            option_menu(screen, screen_width, screen_height)
-                        if button == buttons[2]:
-                            credits_menu(screen, screen_width, screen_height)
-                        if button == buttons[3]:
-                            pygame.quit()
-                            sys.exit()
+                        elif button == buttons[1]:
+                            #Options
+                            running = option_menu(screen, screen_width, screen_height, option_lines)
+                        elif button == buttons[2]:
+                            #Credits
+                            running = credits_menu(screen, screen_width, screen_height, credits_lines)
+                        elif button == buttons[3]:
+                            # Quit
+                            running = False
