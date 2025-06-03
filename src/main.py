@@ -8,76 +8,103 @@ from Object import Object
 from Player import Player
 from graphics import init_graphics
 from start_menu import make_start_menu
-#generally variables
-Game_name = "Demise"
-option_lines = ["Optins:", "", "Bewegen: ", "W          -->     Move vorward", "A          -->     Move Left", "S          -->     Move Backwards", "D          -->     Move Right", "Move Mous  -->     Rotate your Cracter", "Left Klick -->     Shoot with Gun" "", "You can`t change the Keybinds", "", "Press Arrow-Down-Key To go back to the menu" ]
-credits_lines = ["Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober", "Grafik: ", "   Vladimir Kandalintsev", "Sound: ", "   Simon Schober", "", "♥ Thx for playing our Game ♥", "", "Press Arrow-Down-Key To go back to the menu"]
 
-# Movement parameterscredits_lines
+# General variables
+Game_name = "Demise"
+option_lines = [
+    "Options:", "", "Bewegen: ", "W          -->     Move vorward",
+    "A          -->     Move Left", "S          -->     Move Backwards",
+    "D          -->     Move Right", "Move Mous  -->     Rotate your Cracter",
+    "Left Klick -->     Shoot with Gun", "",
+    "You can`t change the Keybinds", "",
+    "Press Arrow-Down-Key To go back to the menu"
+]
+credits_lines = [
+    "Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober",
+    "Grafik: ", "   Vladimir Kandalintsev", "Sound: ", "   Simon Schober",
+    "", "♥ Thx for playing our Game ♥", "",
+    "Press Arrow-Down-Key To go back to the menu"
+]
+
+# Movement parameters
 enemy_gravity = 1.0
 enemy_move_speed = 1.0
-
 player_gravity = 1.0
 move_speed = 1.0
 pan_speed = 1.0
 
-make_start_menu(Game_name, option_lines, credits_lines)
+# State management
+current_state = "menu"
 
-init_graphics()
-pygame.mouse.set_visible(False)
-# LOAD OBJECT AFTER PYGAME INIT
-enemies = [Enemy("assets/Enemy.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
+# Initialize Pygame
+pygame.init()
+pygame.font.init()
 
-objects = [Object("assets/Plane.obj", [0.0, 0.0, 10.0])]
+# Initialize screen
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
+pygame.display.set_caption(Game_name)
+screen_width, screen_height = screen.get_size()
 
-cam_pos = np.array([0.0, 10.0, 0.0])
-rx, ry = 0.0, 0.0
-player = Player(cam_pos, rx, ry, move_speed, player_gravity)
-
-# Generating all the objects
-for enemy in enemies:
-    enemy.generate()
-
-for _object in objects:
-    _object.generate()
-
-# Initiating game clock
+# Game clock
 clock = pygame.time.Clock()
 
-# Switching to editing the model view matrix
-glMatrixMode(GL_MODELVIEW)
+# Initialize OpenGL settings (only once)
+opengl_initialized = False
 
-# Initialize camera position and orientation
-
-# rotate = False
-
-
+# Main loop
 while True:
-    dt = clock.tick(60) / 1000.0  # Delta time in seconds
+    if current_state == "menu":
+        # Render the start menu
+        make_start_menu(screen, Game_name, option_lines, credits_lines)
+        current_state = "game"
 
-    # Event handling
-    for e in pygame.event.get():
-        if e.type == QUIT:
-            sys.exit()
-        elif e.type == KEYDOWN and e.key == K_ESCAPE:
-            sys.exit()
-        elif e.type == MOUSEMOTION:
-            player.dx, player.dy = e.rel
-            player.rx -= player.dx
-            player.ry -= player.dy
+    elif current_state == "game":
+        if not opengl_initialized:
+            # Initialize OpenGL context and settings
+            screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.OPENGL | pygame.DOUBLEBUF)
+            init_graphics((screen.get_width(), screen.get_height()))
+            opengl_initialized = True
 
-    # Handle keyboard input for movement
+            # Initialize game objects
+            enemies = [Enemy("assets/Enemy.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
+            objects = [Object("assets/Plane.obj", [0.0, 0.0, 10.0])]
+            cam_pos = np.array([0.0, 10.0, 0.0])
+            rx, ry = 0.0, 0.0
+            player = Player(cam_pos, rx, ry, move_speed, player_gravity)
 
-    player.compute_cam_direction()
-    player.handle_keyboard_input(dt)
-    player.apply_transformations()
+            # Generate all objects
+            for enemy in enemies:
+                enemy.generate()
+            for _object in objects:
+                _object.generate()
 
-    # Render objects
-    for enemy in enemies:
-        enemy.move_to_target(player.cam_pos, dt)
-        enemy.render()
+            pygame.mouse.set_visible(False)
 
-    for _object in objects:
-        _object.render()
+        # Handle OpenGL rendering
+        dt = clock.tick(60) / 1000.0  # Delta time in seconds
 
-    pygame.display.flip()
+        # Event handling
+        for e in pygame.event.get():
+            if e.type == QUIT:
+                sys.exit()
+            elif e.type == KEYDOWN and e.key == K_ESCAPE:
+                sys.exit()
+            elif e.type == MOUSEMOTION:
+                player.dx, player.dy = e.rel
+                player.rx -= player.dx
+                player.ry -= player.dy
+
+        # Handle keyboard input for movement
+        player.compute_cam_direction()
+        player.handle_keyboard_input(dt)
+        player.apply_transformations()
+
+        # Render objects
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        for enemy in enemies:
+            enemy.move_to_target(player.cam_pos, dt)
+            enemy.render()
+        for _object in objects:
+            _object.render()
+
+        pygame.display.flip()
