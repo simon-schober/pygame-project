@@ -7,6 +7,9 @@ from OBJ import *
 from Object import Object
 from Player import Player
 from graphics import init_graphics
+from start_menu import make_start_menu
+#generally variables
+Game_name = "Demise"
 
 # Movement parameters
 enemy_gravity = 1.0
@@ -15,8 +18,11 @@ enemy_move_speed = 1.0
 player_gravity = 1.0
 move_speed = 1.0
 pan_speed = 1.0
-init_graphics()
 
+make_start_menu(Game_name)
+
+init_graphics()
+pygame.mouse.set_visible(False)
 # LOAD OBJECT AFTER PYGAME INIT
 enemies = [Enemy("assets/Cube.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity),
            Enemy("assets/Sphere.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
