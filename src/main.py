@@ -7,16 +7,24 @@ from OBJ import *
 from Object import Object
 from Player import Player
 from graphics import init_graphics
+from start_menu import make_start_menu
+#generally variables
+Game_name = "Demise"
+option_lines = ["Optins:", "", "Bewegen: ", "W          -->     Move vorward", "A          -->     Move Left", "S          -->     Move Backwards", "D          -->     Move Right", "Move Mous  -->     Rotate your Cracter", "Left Klick -->     Shoot with Gun" "", "You can`t change the Keybinds", "", "Press Arrow-Down-Key To go back to the menu" ]
+credits_lines = ["Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober", "Grafik: ", "   Vladimir Kandalintsev", "Sound: ", "   Simon Schober", "", "♥ Thx for playing our Game ♥", "", "Press Arrow-Down-Key To go back to the menu"]
 
-# Movement parameters
+# Movement parameterscredits_lines
 enemy_gravity = 1.0
 enemy_move_speed = 1.0
 
 player_gravity = 1.0
 move_speed = 1.0
 pan_speed = 1.0
-init_graphics()
 
+make_start_menu(Game_name, option_lines, credits_lines)
+
+init_graphics()
+pygame.mouse.set_visible(False)
 # LOAD OBJECT AFTER PYGAME INIT
 enemies = [Enemy("assets/Enemy.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
 
