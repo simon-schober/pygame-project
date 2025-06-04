@@ -9,7 +9,7 @@ from Player import Player
 from graphics import init_graphics
 from start_menu import make_start_menu
 
-# General variables
+# Menu variables
 Game_name = "Demise"
 option_lines = [
     "Options:", "", "Bewegen: ", "W          -->     Move vorward",
@@ -25,12 +25,13 @@ credits_lines = [
     "", "♥ Thx for playing our Game ♥", "",
     "Press Arrow-Down-Key To go back to the menu"
 ]
-
+scale = 1.05
+brightness = -150
 # Movement parameters
 enemy_gravity = 1.0
 enemy_move_speed = 1.0
 player_gravity = 1.0
-move_speed = 1.0
+move_speed = 1.5
 pan_speed = 1.0
 
 # State management
@@ -55,9 +56,8 @@ opengl_initialized = False
 while True:
     if current_state == "menu":
         # Render the start menu
-        make_start_menu(screen, Game_name, option_lines, credits_lines)
+        current_state = make_start_menu(screen, Game_name, option_lines, credits_lines, scale, brightness)
         current_state = "game"
-
     elif current_state == "game":
         if not opengl_initialized:
             # Initialize OpenGL context and settings
