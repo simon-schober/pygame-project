@@ -12,26 +12,27 @@ from start_menu import make_start_menu
 # Menu variables
 Game_name = "Demise"
 option_lines = [
-    "Options:", "", "Bewegen: ", "W          -->     Move vorward",
-    "A          -->     Move Left", "S          -->     Move Backwards",
-    "D          -->     Move Right", "Move Mous  -->     Rotate your Cracter",
+    "Options:", "Bewegen: ", "W          -->     Move vorward","",
+    "A          -->     Move Left","", "S          -->     Move Backwards","",
+    "D          -->     Move Right","", "Move Mous  -->     Rotate your Cracter","",
     "Left Klick -->     Shoot with Gun", "",
     "You can`t change the Keybinds", "",
-    "Press Arrow-Down-Key To go back to the menu"
+    "Tipp: You can allways press ESC-Key ","to leave the game (The score doesn`t get saved)", "",
+    "Press ESC-Key to go back to the menu"
 ]
 credits_lines = [
-    "Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober",
-    "Grafik: ", "   Vladimir Kandalintsev", "Sound: ", "   Simon Schober",
-    "", "♥ Thx for playing our Game ♥", "",
-    "Press Arrow-Down-Key To go back to the menu"
+    "Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober","",
+    "Grafik: ", "   Vladimir Kandalintsev","", "Sound: ", "   Simon Schober",
+    "","", "♥ Thx for playing our Game ♥", "",
+    "Press ESC-Key to go back to the menu"
 ]
-scale = 1.05
-brightness = -150
+scale = 1.03
+current_state_menu = "main" #main, options, credits
 # Movement parameters
 enemy_gravity = 1.0
 enemy_move_speed = 1.0
 player_gravity = 1.0
-move_speed = 1.5
+move_speed = 1.3
 pan_speed = 1.0
 
 # State management
@@ -56,7 +57,7 @@ opengl_initialized = False
 while True:
     if current_state == "menu":
         # Render the start menu
-        current_state = make_start_menu(screen, Game_name, option_lines, credits_lines, scale, brightness)
+        current_state = make_start_menu(screen, Game_name, option_lines, credits_lines, scale, current_state_menu)
         current_state = "game"
     elif current_state == "game":
         if not opengl_initialized:
