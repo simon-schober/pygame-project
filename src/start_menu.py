@@ -139,7 +139,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
         for i, button in enumerate(buttons[:len(buttons) - 1]):
             mouse_pos = pygame.mouse.get_pos()  #Get the position of the mouse cursor
             #Make a rectangle for the button to check later if button and cursor are at the same position
-            if ((screen_width - button.get_width()) // 2 < mouse_pos[0] < (screen_width + button.get_width()) // 2 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):
+            if ((screen_width - button.get_width()) // 2 +90 < mouse_pos[0] < (screen_width + button.get_width()) // 2 -75 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):
                 #If the mouse is over the button, darken it and make it slightly bigger
                 darker_button = change_brightness(button, buttons, surface, screen_width, screen_height, scale, i)
                 scaled_button = pygame.transform.smoothscale(button,(int(button.get_width() * scale),int(button.get_height() * scale)))
@@ -170,7 +170,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
 
                 #Check each button to see if it was clicked
                 for i, button in enumerate(buttons[:len(buttons) - 1]):
-                    if ((screen_width - button.get_width()) // 2 < mouse_pos[0] < (screen_width + button.get_width()) // 2 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):                    
+                    if ((screen_width - button.get_width()) // 2 +90 < mouse_pos[0] < (screen_width + button.get_width()) // 2 -75 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):                    
                         #If we are on the main menu, figure out which button was clicked
                         if current_state_menu == "main":
                             if i == 0:  #"Play" button
@@ -184,12 +184,12 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
                                 pygame.quit()
                                 sys.exit()
                         #If we are in the options menu, show it
-                        elif current_state_menu == "options":
-                            option_menu(screen, screen_width, screen_height, option_lines)
-                            current_state_menu = "main"
-                        #If we are in the credits menu, show it
-                        elif current_state_menu == "credits":
-                            credits_menu(screen, screen_width, screen_height, credits_lines)
-                            current_state_menu = "main"
+            if current_state_menu == "options":
+                option_menu(screen, screen_width, screen_height, option_lines)
+                current_state_menu = "main"
+            #If we are in the credits menu, show it
+            elif current_state_menu == "credits":
+                credits_menu(screen, screen_width, screen_height, credits_lines)
+                current_state_menu = "main"
 
 #about 130 lines of code Finally my work is don it took me abou a week to winish everything
