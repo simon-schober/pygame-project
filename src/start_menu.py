@@ -139,8 +139,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
         for i, button in enumerate(buttons[:len(buttons) - 1]):
             mouse_pos = pygame.mouse.get_pos()  #Get the position of the mouse cursor
             #Make a rectangle for the button to check later if button and cursor are at the same position
-            button_rect = button.get_rect(topleft=((screen_width - button.get_width()) // 2,int(screen_height * 0.6 + i * screen_height * 0.17) - 300))
-            if button_rect.collidepoint(mouse_pos):
+            if ((screen_width - button.get_width()) // 2 < mouse_pos[0] < (screen_width + button.get_width()) // 2 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):
                 #If the mouse is over the button, darken it and make it slightly bigger
                 darker_button = change_brightness(button, buttons, surface, screen_width, screen_height, scale, i)
                 scaled_button = pygame.transform.smoothscale(button,(int(button.get_width() * scale),int(button.get_height() * scale)))
@@ -171,8 +170,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
 
                 #Check each button to see if it was clicked
                 for i, button in enumerate(buttons[:len(buttons) - 1]):
-                    button_rect = pygame.Rect((screen_width - button.get_width()) // 2,int(screen_height * 0.6 + i * screen_height * 0.17) - 350,button.get_width(),button.get_height())
-                    if button_rect.collidepoint(mouse_pos):
+                    if ((screen_width - button.get_width()) // 2 < mouse_pos[0] < (screen_width + button.get_width()) // 2 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):                    
                         #If we are on the main menu, figure out which button was clicked
                         if current_state_menu == "main":
                             if i == 0:  #"Play" button
