@@ -5,23 +5,24 @@ from OpenGL.raw.GL.VERSION.GL_1_0 import glRotatef, glTranslatef, glClear, GL_CO
 from pygame import *
 
 
-class Player:
+class Player():
     def __init__(self, cam_pos, rx, ry, move_speed, gravity):
         self.rx = rx
         self.ry = ry
         self.direction = [1.0, 0.0, 0.0]
-        self.cam_pos = cam_pos
+        self.position = cam_pos
         self.up = np.array([0.0, 1.0, 0.0])
         self.right = np.cross(self.direction, self.up)
         self.right = self.right / np.linalg.norm(self.right)
         self.move_speed = move_speed
         self.gravity = gravity
+        self.floor = 0.0
 
     def apply_cam_transforms(self):
         # Apply camera transformations
         glRotatef(-self.ry, 1, 0, 0)
         glRotatef(-self.rx, 0, 1, 0)
-        glTranslatef(-self.cam_pos[0], -self.cam_pos[1], -self.cam_pos[2])
+        glTranslatef(-self.position[0], -self.position[1], -self.position[2])
 
     def compute_cam_direction(self):
         yaw_rad = np.radians(self.rx)
@@ -48,21 +49,43 @@ class Player:
         # Apply camera transformations
         glRotatef(-self.ry, 1, 0, 0)
         glRotatef(-self.rx, 0, 1, 0)
-        glTranslatef(-self.cam_pos[0], -self.cam_pos[1], -self.cam_pos[2])
+        glTranslatef(-self.position[0], -self.position[1], -self.position[2])
 
-    def handle_keyboard_input(self, dt):
+    def handle_flying_movement(self, dt):
         keys = pygame.key.get_pressed()
 
         # Movement
         if keys[K_s]:
-            self.cam_pos += self.direction * self.move_speed * dt
+            self.position += self.direction * self.move_speed * dt
         if keys[K_w]:
-            self.cam_pos -= self.direction * self.move_speed * dt
+            self.position -= self.direction * self.move_speed * dt
         if keys[K_d]:
-            self.cam_pos -= self.right * self.move_speed * dt
+            self.position -= self.right * self.move_speed * dt
         if keys[K_a]:
-            self.cam_pos += self.right * self.move_speed * dt
+            self.position += self.right * self.move_speed * dt
         if keys[K_SPACE]:
-            self.cam_pos += self.up * self.move_speed * dt
+            self.position += self.up * self.move_speed * dt
         if keys[K_LSHIFT]:
-            self.cam_pos -= self.up * self.move_speed * dt
+            self.position -= self.up * self.move_speed * dt
+
+    def handle_walking_movement(self, dt):
+        keys = pygame.key.get_pressed()
+
+        # Bewegung nur auf der XZ-Ebene (Y bleibt Höhe)
+        move_dir = np.array([self.direction[0], 0, self.direction[2]])
+        move_dir = move_dir / np.linalg.norm(move_dir)
+        right_dir = np.array([self.right[0], 0, self.right[2]])
+        right_dir = right_dir / np.linalg.norm(right_dir)
+
+        if keys[K_s]:
+            self.position += move_dir * self.move_speed * dt
+        if keys[K_w]:
+            self.position -= move_dir * self.move_speed * dt
+        if keys[K_d]:
+            self.position -= right_dir * self.move_speed * dt
+        if keys[K_a]:
+            self.position += right_dir * self.move_speed * dt
+
+    def apply_gravity(self, dt):
+        if self.position[1] > self.floor:
+            self.position[1] -= self.gravity * dt
