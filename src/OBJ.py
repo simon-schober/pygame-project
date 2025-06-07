@@ -1,11 +1,13 @@
 import os
+
+import numpy as np
 import pygame
 from OpenGL.GL import *
-import numpy as np
 
 
 class OBJ:
     generate_on_init = True
+
     @classmethod
     def loadTexture(cls, imagefile):
         surf = pygame.image.load(imagefile)
@@ -95,27 +97,33 @@ class OBJ:
     def generate(self):
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
-        glEnable(GL_TEXTURE_2D)
-        glFrontFace(GL_CCW)
-        for face in self.faces:
-            vertices, normals, texture_coords, material = face
 
+        glEnable(GL_TEXTURE_2D)  # <— enable once
+        glFrontFace(GL_CCW)
+
+        for face in self.faces:
+            vertices, normals, texcoords, material = face
             mtl = self.mtl[material]
+
+            # Make sure we draw textured faces in white, so the texture shows
+            glColor3f(1.0, 1.0, 1.0)
+
             if 'texture_Kd' in mtl:
-                # use diffuse texmap
                 glBindTexture(GL_TEXTURE_2D, mtl['texture_Kd'])
             else:
-                # just use diffuse colour
-                glColor(*mtl['Kd'])
+                # “Unbind” any texture, fall back to flat color
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glColor3fv(mtl['Kd'])
 
             glBegin(GL_POLYGON)
             for i in range(len(vertices)):
                 if normals[i] > 0:
                     glNormal3fv(self.normals[normals[i] - 1])
-                if texture_coords[i] > 0:
-                    glTexCoord2fv(self.texcoords[texture_coords[i] - 1])
+                if texcoords[i] > 0:
+                    glTexCoord2fv(self.texcoords[texcoords[i] - 1])
                 glVertex3fv(self.vertices[vertices[i] - 1])
             glEnd()
+
         glDisable(GL_TEXTURE_2D)
         glEndList()
 
