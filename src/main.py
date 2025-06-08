@@ -103,6 +103,7 @@ while True:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         for enemy in enemies:
             enemy.move_to_target(player.position, dt)
+            enemy.rotate_to_target(player.position)
             enemy.apply_gravity(dt)
             enemy.render()
 
