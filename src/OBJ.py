@@ -93,6 +93,7 @@ class OBJ:
             self.generate()
 
         self.position = np.array([0.0, 0.0, 0.0])
+        self.rotation = np.array([0.0, 0.0, 0.0])
 
     def generate(self):
         self.gl_list = glGenLists(1)
@@ -130,6 +131,9 @@ class OBJ:
     def render(self):
         glPushMatrix()  # Save the current transformation state
         glTranslatef(*self.position)  # Apply the object's translation
+        glRotatef(self.rotation[0], 1, 0, 0)  # Rotate around X-axis
+        glRotatef(self.rotation[1], 0, 1, 0)  # Rotate around Y-axis
+        glRotatef(self.rotation[2], 0, 0, 1)  # Rotate around Z-axis
         glCallList(self.gl_list)
         glPopMatrix()  # Restore the previous transformation state
 
