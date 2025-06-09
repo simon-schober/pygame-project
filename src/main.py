@@ -101,3 +101,6 @@ while True:
         player.apply_gravity(dt)
 
         pygame.display.flip()
+    elif current_state == "exit":
+        pygame.quit()
+        exit()

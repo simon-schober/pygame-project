@@ -164,7 +164,9 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
                         elif i == 2:  #Credits button
                             current_state_menu = "credits"
                         elif i == 3:  #Quit button
-                            pygame.quit()
+                            running = False
+                            return "exit"
+                            sys.quit()
                             sys.exit()
         if current_state_menu == "options":
             option_menu(screen, screen_width, screen_height, option_lines)
