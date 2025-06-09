@@ -43,7 +43,8 @@ class OBJ:
                 mtl[values[0]] = list(map(float, values[1:]))
         return contents
 
-    def __init__(self, filename, swapyz=False):
+    def __init__(self, filename, position=np.zeros(3), rotation=np.zeros(3), scale=np.zeros(3),
+                 swapyz=False):
         """Loads a Wavefront OBJ file. """
         self.vertices = []
         self.normals = []
@@ -92,8 +93,9 @@ class OBJ:
         if self.generate_on_init:
             self.generate()
 
-        self.position = np.array([0.0, 0.0, 0.0])
-        self.rotation = np.array([0.0, 0.0, 0.0])
+        self.position = position
+        self.rotation = rotation
+        self.scale = scale
 
     def generate(self):
         self.gl_list = glGenLists(1)
@@ -134,6 +136,7 @@ class OBJ:
         glRotatef(self.rotation[0], 1, 0, 0)  # Rotate around X-axis
         glRotatef(self.rotation[1], 0, 1, 0)  # Rotate around Y-axis
         glRotatef(self.rotation[2], 0, 0, 1)  # Rotate around Z-axis
+        # glScalef(*self.scale)
         glCallList(self.gl_list)
         glPopMatrix()  # Restore the previous transformation state
 

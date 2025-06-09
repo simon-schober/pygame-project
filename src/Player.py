@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import pygame
 from OpenGL.raw.GL.VERSION.GL_1_0 import glRotatef, glTranslatef, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, \
@@ -5,18 +7,22 @@ from OpenGL.raw.GL.VERSION.GL_1_0 import glRotatef, glTranslatef, glClear, GL_CO
 from pygame import *
 
 
-class Player():
-    def __init__(self, cam_pos, rx, ry, move_speed, gravity):
+class Player:
+    def __init__(self, cam_pos=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1, floor=2.0,
+                 direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0])):
+        self.dx = 0
+        self.dy = 0
         self.rx = rx
         self.ry = ry
         self.direction = [1.0, 0.0, 0.0]
         self.position = cam_pos
-        self.up = np.array([0.0, 1.0, 0.0])
+        self.direction = direction
+        self.up = up
         self.right = np.cross(self.direction, self.up)
         self.right = self.right / np.linalg.norm(self.right)
         self.move_speed = move_speed
         self.gravity = gravity
-        self.floor = 0.0
+        self.floor = floor
 
     def apply_cam_transforms(self):
         # Apply camera transformations
@@ -37,7 +43,6 @@ class Player():
         self.direction = self.direction / np.linalg.norm(self.direction)
 
         # Compute right and up vectors
-        self.up = np.array([0.0, 1.0, 0.0])
         self.right = np.cross(self.direction, self.up)
         self.right = self.right / np.linalg.norm(self.right)
 
@@ -67,6 +72,18 @@ class Player():
             self.position += self.up * self.move_speed * dt
         if keys[K_LSHIFT]:
             self.position -= self.up * self.move_speed * dt
+
+    def handle_events(self):
+        # Event handling
+        for e in pygame.event.get():
+            if e.type == QUIT:
+                sys.exit()
+            elif e.type == KEYDOWN and e.key == K_ESCAPE:
+                sys.exit()
+            elif e.type == MOUSEMOTION:
+                self.dx, self.dy = e.rel
+                self.rx -= self.dx
+                self.ry -= self.dy
 
     def handle_walking_movement(self, dt):
         keys = pygame.key.get_pressed()
