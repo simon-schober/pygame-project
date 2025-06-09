@@ -12,22 +12,22 @@ from start_menu import make_start_menu
 # Menu variables
 Game_name = "Demise"
 option_lines = [
-    "Options:", "Bewegen: ", "W          -->     Move vorward", "",
-    "A          -->     Move Left", "", "S          -->     Move Backwards", "",
-    "D          -->     Move Right", "", "Move Mous  -->     Rotate your Cracter", "",
-    "Left Klick -->     Shoot with Gun", "",
-    "You can`t change the Keybinds", "",
-    "Tipp: You can allways press ESC-Key ", "to leave the game (The score doesn`t get saved)", "",
-    "Press ESC-Key to go back to the menu"
+    "Options:", "Move: ", "W          -->     Move vorward", "",
+    "A          -->     Move left", "", "S          -->     Move backwards", "",
+    "D          -->     Move right", "", "Move mouse  -->     Rotate your cracter", "",
+    "Left klick -->     Shoot with gun", "",
+    "You can`t change the keybinds", "",
+    "Tipp: You can allways press ESC-key ", "to leave the game (The score doesn`t get saved)", "",
+    "Press ESC-key to go back to the menu"
 ]
 credits_lines = [
-    "Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober", "",
-    "Grafik: ", "   Vladimir Kandalintsev", "", "Sound: ", "   Simon Schober",
-    "", "", "♥ Thx for playing our Game ♥", "",
-    "Press ESC-Key to go back to the menu"
+    "Credits:", "", "Coding: ", "   Simon Schober & Alexander Sief", "",
+    "Grafik: ", "   Vladimir Kandalintsev", "", "Sounds: ", "   Simon Schober",
+    "", "", "Thx for playing our Game", "",
+    "Press ESC-key to go back to the menu"
 ]
 scale = 1.03
-current_state_menu = "main"  # main, options, credits
+current_state_start_menu = "main"  # main, options, credits
 # Movement parameters
 enemy_gravity = 1.0
 enemy_move_speed = 1.0
@@ -59,7 +59,7 @@ pygame.mouse.set_visible(False)
 while True:
     if current_state == "menu":
         # Render the start menu
-        current_state = make_start_menu(screen, Game_name, option_lines, credits_lines, scale, current_state_menu)
+        current_state = make_start_menu(screen, Game_name, option_lines, credits_lines, scale, current_state_start_menu)
     elif current_state == "game":
         if not opengl_initialized:
             # Initialize OpenGL context and settings
