@@ -69,7 +69,7 @@ while True:
 
             # Initialize game objects
             enemies = [Enemy("assets/Enemy.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
-            objects = [Object("assets/Plane.obj", [0.0, -2.0, 0.0])]
+            objects = [Object("assets/Plane.obj", [0.0, -2.0, 0.0]), Object("assets/Castle.obj", [30.0, -2.0 ,30.0])]
             cam_pos = np.array([0.0, 10.0, 0.0])
             rx, ry = 0.0, 0.0
             player = Player(cam_pos, rx, ry, move_speed, player_gravity)
