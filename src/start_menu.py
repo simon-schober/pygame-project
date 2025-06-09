@@ -6,7 +6,7 @@ def scale_button(button, screen_width):
 
 def load_buttons(screen_width):
     #Load all the button pictures, and scale it
-    play = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\play.png'), screen_width)
+    play = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\play.png').convert_alpha(), screen_width)
     option = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\optionen.png').convert_alpha(),screen_width)
     credits = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\credits.png').convert_alpha(),screen_width)
     quit = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\quit.png').convert_alpha(),screen_width)
@@ -19,6 +19,13 @@ def load_buttons(screen_width):
 
     #Return a list of the button images plus the dark overlay surface
     return [play, option, credits, quit, dark_button], surface  #dark_button is last!!!
+
+def scale_mouse_texture(mouse_texture, screen_width):
+    return	pygame.transform.scale(mouse_texture, (int(screen_width * 0.035), int(mouse_texture.get_height() * (screen_width * 0.035) / mouse_texture.get_width())))
+
+def change_mouse_texture(screen_width):
+    return scale_mouse_texture(pygame.image.load(r'assets\StartMenu\Mouse_texture\Mouse_skull.png').convert_alpha(), screen_width)
+
 
 def change_brightness(button, buttons, surface, screen_width, screen_height, scale, i):
     #Take the last image in buttons (dark_button) and resize it to match the hovered button size
@@ -121,6 +128,8 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
     #Get the width and height of the window
     screen_width, screen_height = screen.get_size()
 
+    #Makes a new mouse texture
+    mouse_texture = change_mouse_texture(screen_width)
     #Load and scale the background image for the start menu
     start_bg_picture = pygame.image.load(r"assets\StartMenu\Background\thumb_Doom_1993.jpeg")
     start_bg_picture = pygame.transform.scale(start_bg_picture, (screen_width, screen_height))
@@ -152,9 +161,9 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
                 screen.blit(button,((int(screen_width - button.get_width()) // 2),(int(screen_height * 0.6 + i * screen_height * 0.17) - 350),))
 
         #Draw the game name text with texture on top of everything
+        screen.blit(mouse_texture, (mouse_pos[0]-10, mouse_pos[1]-3))
         screen.blit(text_with_texture, rect)
         pygame.display.flip()  #Show all the drawn stuff on the screen
-
         #Check for events like clicks or quitting
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
