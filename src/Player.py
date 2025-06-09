@@ -5,7 +5,7 @@ import pygame
 from OpenGL.GL import *
 from pygame import *
 
-from src.Hitbox import Hitbox
+from Hitbox import Hitbox
 
 
 def render_crosshair(screen_height, screen_width):
