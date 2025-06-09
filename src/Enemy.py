@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from src.OBJ import OBJ
+from OBJ import OBJ
 
 
 class Enemy(OBJ):
