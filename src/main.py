@@ -1,10 +1,5 @@
-import sys
-
-from pygame import *
-
 from Enemy import *
 from OBJ import *
-from Object import Object
 from Player import Player
 from graphics import init_graphics
 from start_menu import make_start_menu
@@ -20,20 +15,14 @@ option_lines = [
     "Tipp: You can allways press ESC-Key ", "to leave the game (The score doesn`t get saved)", "",
     "Press ESC-Key to go back to the menu"
 ]
-credits_lines = [
+credit_lines = [
     "Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober", "",
     "Grafik: ", "   Vladimir Kandalintsev", "", "Sound: ", "   Simon Schober",
     "", "", "♥ Thx for playing our Game ♥", "",
     "Press ESC-Key to go back to the menu"
 ]
-scale = 1.03
+start_menu_scale = 1.03
 current_state_menu = "main"  # main, options, credits
-# Movement parameters
-enemy_gravity = 1.0
-enemy_move_speed = 1.0
-player_gravity = 1.0
-move_speed = 10
-pan_speed = 1.0
 
 # State management
 current_state = "menu"
@@ -53,11 +42,14 @@ clock = pygame.time.Clock()
 # Initialize OpenGL settings (only once)
 opengl_initialized = False
 
+player, enemies, objects = None, None, None
+
 # Main loop
 while True:
     if current_state == "menu":
         # Render the start menu
-        current_state = make_start_menu(screen, Game_name, option_lines, credits_lines, scale, current_state_menu)
+        current_state = make_start_menu(screen, Game_name, option_lines, credit_lines, start_menu_scale,
+                                        current_state_menu)
     elif current_state == "game":
         if not opengl_initialized:
             # Initialize OpenGL context and settings
@@ -66,11 +58,9 @@ while True:
             opengl_initialized = True
 
             # Initialize game objects
-            enemies = [Enemy("assets/Enemy.obj", [0.0, 10.0, 10.0], enemy_move_speed, enemy_gravity)]
-            objects = [Object("assets/Plane.obj", [0.0, -2.0, 0.0])]
-            cam_pos = np.array([0.0, 10.0, 0.0])
-            rx, ry = 0.0, 0.0
-            player = Player(cam_pos, rx, ry, move_speed, player_gravity)
+            enemies = [Enemy("assets/Enemy.obj")]
+            objects = [OBJ("assets/Plane.obj")]
+            player = Player()
 
             # Generate all objects
             for enemy in enemies:
@@ -83,16 +73,7 @@ while True:
         # Handle OpenGL rendering
         dt = clock.tick(60) / 1000.0  # Delta time in seconds
 
-        # Event handling
-        for e in pygame.event.get():
-            if e.type == QUIT:
-                sys.exit()
-            elif e.type == KEYDOWN and e.key == K_ESCAPE:
-                sys.exit()
-            elif e.type == MOUSEMOTION:
-                player.dx, player.dy = e.rel
-                player.rx -= player.dx
-                player.ry -= player.dy
+        player.handle_events()
 
         # Handle keyboard input for movement
         player.compute_cam_direction()
