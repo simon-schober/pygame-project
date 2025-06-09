@@ -2,20 +2,51 @@ import sys
 
 import numpy as np
 import pygame
-from OpenGL.raw.GL.VERSION.GL_1_0 import glRotatef, glTranslatef, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, \
-    glLoadIdentity
+from OpenGL.GL import *
 from pygame import *
+
+from src.Hitbox import Hitbox
+
+
+def render_crosshair(screen_height, screen_width):
+    glDisable(GL_DEPTH_TEST)  # Deaktiviere Tiefentest für 2D-Rendering
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    glOrtho(0, screen_width, screen_height, 0, -1, 1)
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    glLineWidth(2)  # Dicke der Linien
+    glColor3f(1.0, 1.0, 1.0)  # Farbe des Crosshairs (Weiß)
+
+    glBegin(GL_LINES)
+    # Horizontale Linie
+    glVertex3f(screen_width / 2 - 10, screen_height / 2, 0.0)  # Z-Wert auf 0.0 setzen
+    glVertex3f(screen_width / 2 + 10, screen_height / 2, 0.0)
+    # Vertikale Linie
+    glVertex3f(screen_width / 2, screen_height / 2 - 10, 0.0)
+    glVertex3f(screen_width / 2, screen_height / 2 + 10, 0.0)
+    glEnd()
+
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    glEnable(GL_DEPTH_TEST)  # Reaktiviere Tiefentest
 
 
 class Player:
-    def __init__(self, cam_pos=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1, floor=2.0,
-                 direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0])):
+    def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1, floor=2.0,
+                 direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),
+                 hitbox_size=np.array([2.0, 2.0, 2.0]), hp=10.0):
         self.dx = 0
         self.dy = 0
         self.rx = rx
         self.ry = ry
         self.direction = [1.0, 0.0, 0.0]
-        self.position = cam_pos
+        self.position = position
         self.direction = direction
         self.up = up
         self.right = np.cross(self.direction, self.up)
@@ -23,12 +54,8 @@ class Player:
         self.move_speed = move_speed
         self.gravity = gravity
         self.floor = floor
-
-    def apply_cam_transforms(self):
-        # Apply camera transformations
-        glRotatef(-self.ry, 1, 0, 0)
-        glRotatef(-self.rx, 0, 1, 0)
-        glTranslatef(-self.position[0], -self.position[1], -self.position[2])
+        self.hitbox = Hitbox(position, hitbox_size)
+        self.hp = hp
 
     def compute_cam_direction(self):
         yaw_rad = np.radians(self.rx)
@@ -55,6 +82,7 @@ class Player:
         glRotatef(-self.ry, 1, 0, 0)
         glRotatef(-self.rx, 0, 1, 0)
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
+        self.hitbox.position = self.position
 
     def handle_flying_movement(self, dt):
         keys = pygame.key.get_pressed()
@@ -73,7 +101,7 @@ class Player:
         if keys[K_LSHIFT]:
             self.position -= self.up * self.move_speed * dt
 
-    def handle_events(self):
+    def handle_events(self, enemies):
         # Event handling
         for e in pygame.event.get():
             if e.type == QUIT:
@@ -84,6 +112,8 @@ class Player:
                 self.dx, self.dy = e.rel
                 self.rx -= self.dx
                 self.ry -= self.dy
+            elif e.type == MOUSEBUTTONDOWN and e.button == 1:  # Linke Maustaste
+                self.raycast_shoot(enemies)
 
     def handle_walking_movement(self, dt):
         keys = pygame.key.get_pressed()
@@ -106,3 +136,27 @@ class Player:
     def apply_gravity(self, dt):
         if self.position[1] > self.floor:
             self.position[1] -= self.gravity * dt
+        if self.position[1] < self.floor:
+            self.position[1] = self.floor
+
+    def check_collision(self, enemies, dt, pushback_multiplier=18):
+        for enemy in enemies:
+            collision_vector = self.hitbox.get_collision_vector(enemy.hitbox)
+            if collision_vector is not None:
+                self.position -= collision_vector * pushback_multiplier * dt  # Spieler wird im Kollisionsvektor zurückgeschoben
+                self.hp -= 0.2
+                return True
+        return False
+
+    def raycast_shoot(self, enemies):
+        ray_origin = self.position
+
+        for enemy in enemies:
+            if enemy.hitbox.check_ray_collision(ray_origin, -self.direction):
+                enemy.hp -= 1
+                return True
+        return False
+
+    def kill_if_dead(self):
+        if not self.hp:
+            sys.exit()

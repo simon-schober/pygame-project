@@ -43,7 +43,7 @@ class OBJ:
                 mtl[values[0]] = list(map(float, values[1:]))
         return contents
 
-    def __init__(self, filename, position=np.zeros(3), rotation=np.zeros(3), scale=np.zeros(3),
+    def __init__(self, filename, position=np.zeros(3), rotation=np.zeros(3), scale=np.ones(3),
                  swapyz=False):
         """Loads a Wavefront OBJ file. """
         self.vertices = []
@@ -139,7 +139,7 @@ class OBJ:
         glRotatef(self.rotation[0], 1, 0, 0)  # Rotate around X-axis
         glRotatef(self.rotation[1], 0, 1, 0)  # Rotate around Y-axis
         glRotatef(self.rotation[2], 0, 0, 1)  # Rotate around Z-axis
-        # glScalef(*self.scale)
+        glScalef(*self.scale)
         glCallList(self.gl_list)
         glPopMatrix()  # Restore the previous transformation state
 
