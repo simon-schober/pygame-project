@@ -52,6 +52,8 @@ clock = pygame.time.Clock()
 
 # Initialize OpenGL settings (only once)
 opengl_initialized = False
+#Set the Mouse invisible
+pygame.mouse.set_visible(False)
 
 # Main loop
 while True:
@@ -77,8 +79,6 @@ while True:
                 enemy.generate()
             for _object in objects:
                 _object.generate()
-
-            pygame.mouse.set_visible(False)
 
         # Handle OpenGL rendering
         dt = clock.tick(60) / 1000.0  # Delta time in seconds
