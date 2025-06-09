@@ -50,6 +50,8 @@ opengl_initialized = False
 
 player, enemies, objects = None, None, None
 
+pygame.mouse.set_visible(False)
+
 # Main loop
 while True:
     if current_state == "menu":
