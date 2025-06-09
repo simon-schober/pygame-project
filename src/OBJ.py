@@ -71,7 +71,10 @@ class OBJ:
             elif values[0] == 'vt':
                 self.texcoords.append(list(map(float, values[1:3])))
             elif values[0] in ('usemtl', 'usemat'):
-                material = values[1]
+                if len(values) < 2:
+                    material = "Material"
+                else:
+                    material = values[1]
             elif values[0] == 'mtllib':
                 self.mtl = self.loadMaterial(os.path.join(dirname, values[1]))
             elif values[0] == 'f':
