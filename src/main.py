@@ -1,23 +1,23 @@
 from Enemy import *
 from OBJ import *
-from Player import Player
+from Player import Player, render_crosshair
 from graphics import init_graphics
 from start_menu import make_start_menu
 
 # Menu variables
 Game_name = "Demise"
 option_lines = [
-    "Options:", "Bewegen: ", "W          -->     Move vorward", "",
+    "Options:", "Move: ", "W          -->     Move forward", "",
     "A          -->     Move Left", "", "S          -->     Move Backwards", "",
-    "D          -->     Move Right", "", "Move Mous  -->     Rotate your Cracter", "",
-    "Left Klick -->     Shoot with Gun", "",
+    "D          -->     Move Right", "", "Move Mouse  -->     Rotate your Character", "",
+    "Left click -->     Shoot with Gun", "",
     "You can`t change the Keybinds", "",
-    "Tipp: You can allways press ESC-Key ", "to leave the game (The score doesn`t get saved)", "",
+    "Tip: You can allways press ESC-Key ", "to leave the game (The score doesn't get saved)", "",
     "Press ESC-Key to go back to the menu"
 ]
 credit_lines = [
-    "Credits:", "", "Programmierung: ", "   Alexander Sief & Simon Schober", "",
-    "Grafik: ", "   Vladimir Kandalintsev", "", "Sound: ", "   Simon Schober",
+    "Credits:", "", "Programming: ", "   Alexander Sief & Simon Schober", "",
+    "Graphics: ", "   Vladimir Kandalintsev", "", "Sound: ", "   Simon Schober",
     "", "", "♥ Thx for playing our Game ♥", "",
     "Press ESC-Key to go back to the menu"
 ]
@@ -44,6 +44,9 @@ opengl_initialized = False
 
 player, enemies, objects = None, None, None
 
+spawn_interval = 500  # Time in milliseconds
+last_spawn_time = pygame.time.get_ticks()  # Point in time of last spawn
+
 # Main loop
 while True:
     if current_state == "menu":
@@ -59,8 +62,8 @@ while True:
 
             # Initialize game objects
             enemies = [Enemy("assets/Enemy.obj")]
-            objects = [OBJ("assets/Plane.obj")]
-            player = Player()
+            objects = [OBJ("assets/Castle.obj", scale=[3.0, 3.0, 3.0])]
+            player = Player(position=np.array([0.0, 0.0, 10.0]))
 
             # Generate all objects
             for enemy in enemies:
@@ -73,24 +76,37 @@ while True:
         # Handle OpenGL rendering
         dt = clock.tick(60) / 1000.0  # Delta time in seconds
 
-        player.handle_events()
+        player.handle_events(enemies)
 
         # Handle keyboard input for movement
         player.compute_cam_direction()
         player.handle_walking_movement(dt)
         player.apply_transformations()
+        player.apply_gravity(dt)
+        player.kill_if_dead()
 
         # Render objects
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+        player.check_collision(enemies, dt)
+
+        current_time = pygame.time.get_ticks()
+        if current_time - last_spawn_time >= spawn_interval:
+            enemy = Enemy("assets/Enemy.obj", position=(np.random.random(3) * 200) - 100)
+            enemy.generate()
+            enemies.append(enemy)
+            last_spawn_time = current_time
+
         for enemy in enemies:
             enemy.move_to_target(player.position, dt)
             enemy.rotate_to_target(player.position)
             enemy.apply_gravity(dt)
+            enemy.kill_if_dead(enemies)
             enemy.render()
 
         for _object in objects:
             _object.render()
 
-        player.apply_gravity(dt)
+        render_crosshair(screen_height, screen_width)
 
         pygame.display.flip()

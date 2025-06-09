@@ -1,6 +1,7 @@
 # Blender 4.4.3
 # www.blender.org
 mtllib Castle.mtl
+usemtl Castle.mtl
 o Door_2
 v 10.981856 2.244539 -7.349320
 v 10.981856 0.543296 -7.349320
