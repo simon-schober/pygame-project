@@ -44,7 +44,7 @@ opengl_initialized = False
 
 player, enemies, objects = None, None, None
 
-spawn_interval = 500  # Time in milliseconds
+spawn_interval = 2000  # Time in milliseconds
 last_spawn_time = pygame.time.get_ticks()  # Point in time of last spawn
 
 # Main loop
