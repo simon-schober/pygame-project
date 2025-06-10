@@ -5,7 +5,7 @@ import pygame
 
 def scale_button(button, screen_width):
     return pygame.transform.scale(button, (
-    int(screen_width * 0.32), int(button.get_height() * (screen_width * 0.32) / button.get_width()),), )
+        int(screen_width * 0.32), int(button.get_height() * (screen_width * 0.32) / button.get_width()),), )
 
 
 def load_buttons(screen_width):
@@ -28,7 +28,8 @@ def load_buttons(screen_width):
 
 def scale_mouse_texture(mouse_texture, screen_width):
     return pygame.transform.scale(mouse_texture, (
-    int(screen_width * 0.035), int(mouse_texture.get_height() * (screen_width * 0.035) / mouse_texture.get_width())))
+        int(screen_width * 0.035),
+        int(mouse_texture.get_height() * (screen_width * 0.035) / mouse_texture.get_width())))
 
 
 def change_mouse_texture(screen_width):
@@ -42,7 +43,7 @@ def change_brightness(button, buttons, surface, screen_width, screen_height, sca
                                                  (int(button.get_width() * scale), int(button.get_height() * scale)))
     # Put the dark overlay on top of the button at the correct position
     surface.blit(scaled_button, (
-    (int(screen_width - button.get_width()) // 2), (int(screen_height * 0.6 + i * screen_height * 0.17) - 350),), )
+        (int(screen_width - button.get_width()) // 2), (int(screen_height * 0.6 + i * screen_height * 0.17) - 350),), )
     # Return the dark overlay picture we just made
     return scaled_button
 
@@ -166,12 +167,12 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
             # Make a rectangle for the button to check later if button and cursor are at the same position
             if ((screen_width - button.get_width()) // 2 + 90 < mouse_pos[0] < (
                     screen_width + button.get_width()) // 2 - 75 and int(
-                    screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(
-                    screen_height * 0.6 + i * screen_height * 0.17) - 140):
+                screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(
+                screen_height * 0.6 + i * screen_height * 0.17) - 140):
                 # If the mouse is over the button, darken it and make it slightly bigger
                 darker_button = change_brightness(button, buttons, surface, screen_width, screen_height, scale, i)
                 scaled_button = pygame.transform.smoothscale(button, (
-                int(button.get_width() * scale), int(button.get_height() * scale)))
+                    int(button.get_width() * scale), int(button.get_height() * scale)))
                 # Draw the bigger button first
                 screen.blit(scaled_button, ((int(screen_width - scaled_button.get_width()) // 2),
                                             (int(screen_height * 0.6 + i * screen_height * 0.17) - 350),))
@@ -204,8 +205,8 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
                 for i, button in enumerate(buttons[:len(buttons) - 1]):
                     if ((screen_width - button.get_width()) // 2 + 90 < mouse_pos[0] < (
                             screen_width + button.get_width()) // 2 - 75 and int(
-                            screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(
-                            screen_height * 0.6 + i * screen_height * 0.17) - 140):
+                        screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(
+                        screen_height * 0.6 + i * screen_height * 0.17) - 140):
                         # If we are on the main menu, figure out which button was clicked
                         if current_state_menu == "main":
                             if i == 0:  # "Play" button
