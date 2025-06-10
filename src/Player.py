@@ -58,7 +58,7 @@ class Player:
         self.hp = hp
 
     def compute_cam_direction(self):
-        yaw_rad = np.radians(self.rx)
+        yaw_rad = np.radians(self.rx)  # player.rx
         pitch_rad = np.radians(self.ry)
 
         # Compute direction vector
@@ -144,7 +144,7 @@ class Player:
             collision_vector = self.hitbox.get_collision_vector(enemy.hitbox)
             if collision_vector is not None:
                 self.position -= collision_vector * pushback_multiplier * dt  # Spieler wird im Kollisionsvektor zurückgeschoben
-                self.hp -= 0.2
+                self.hp -= enemy.damage
                 return True
         return False
 
