@@ -9,7 +9,7 @@ from OBJ import OBJ
 class Enemy(OBJ):
     def __init__(self, filename, move_speed=1, gravity=1, position=np.zeros(3), rotation=np.zeros(3),
                  scale=np.ones(3), floor=2.0, hitbox_size=np.array([3.4, 2, 3.4]),
-                 hp=3, damage=0.5, swapyz=False):
+                 hp=3, damage=1.0, swapyz=False):
         super().__init__(filename, position, rotation, scale, swapyz)
         self.gravity = gravity
         self.move_speed = move_speed

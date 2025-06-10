@@ -19,7 +19,7 @@ def render_crosshair(screen_height, screen_width):
     glLoadIdentity()
 
     glLineWidth(2)  # Dicke der Linien
-    glColor3f(1.0, 1.0, 1.0)  # Farbe des Crosshairs (Weiß)
+    glColor3f(255.0, 255.0, 255.0)  # Farbe des Crosshairs (Weiß)
 
     glBegin(GL_LINES)
     # Horizontale Linie
@@ -40,7 +40,7 @@ def render_crosshair(screen_height, screen_width):
 class Player:
     def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1, floor=2.0,
                  direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),
-                 hitbox_size=np.array([2.0, 2.0, 2.0]), hp=10.0):
+                 hitbox_size=np.array([2.0, 2.0, 2.0]), hp=200.0):
         self.dx = 0
         self.dy = 0
         self.rx = rx

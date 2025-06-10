@@ -133,6 +133,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
         screen.blit(text_with_texture, (((screen_width - text_with_texture.get_width()) // 2), 0))
         for i, button in enumerate(buttons[:len(buttons) - 1]):
             if ((screen_width - button.get_width()) // 2 +90 < mouse_pos[0] < (screen_width + button.get_width()) // 2 -75 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):
+                was_clicked = True
             #If the mouse is over the button, darken it and make it slightly bigger
                 darker_button = change_brightness(button, buttons, scale)
                 scaled_button = pygame.transform.smoothscale(button,(int(button.get_width() * scale),int(button.get_height() * scale)))
@@ -143,6 +144,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
             else:
                 #If the mouse is not over it, just draw the normal button
                 screen.blit(button,((int(screen_width - button.get_width()) // 2),(int(screen_height * 0.6 + i * screen_height * 0.17) - 350),))
+                was_clicked = False
             #Watch for any key presses
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -153,7 +155,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1 and was_clicked:
                     #If we are on the main menu, look which button was clicked
                     if current_state_menu == "main":
                         if i == 0:  #"Play" button
