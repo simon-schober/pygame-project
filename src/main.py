@@ -11,8 +11,8 @@ option_lines = [
     "A          -->     Move Left", "", "S          -->     Move Backwards", "",
     "D          -->     Move Right", "", "Move Mouse  -->     Rotate your Character", "",
     "Left click -->     Shoot with Gun", "",
-    "You can`t change the Keybinds", "",
-    "Tip: You can allways press ESC-Key ", "to leave the game (The score doesn't get saved)", "",
+    "You can't change the Keybinds", "",
+    "Tip: You can always press ESC-Key ", "to leave the game (The score doesn't get saved)", "",
     "Press ESC-Key to go back to the menu"
 ]
 credit_lines = [
@@ -48,6 +48,7 @@ spawn_interval = 500  # Time in milliseconds
 last_spawn_time = pygame.time.get_ticks()  # Point in time of last spawn
 
 # Main loop
+pygame.mouse.set_visible(False)
 while True:
     if current_state == "menu":
         # Render the start menu
@@ -62,7 +63,7 @@ while True:
 
             # Initialize game objects
             enemies = [Enemy("assets/Enemy.obj")]
-            objects = [OBJ("assets\Plane.obj", scale=[3.0, 3.0, 3.0])]
+            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0])]
             player = Player(position=np.array([0.0, 0.0, 10.0]))
 
             # Generate all objects
