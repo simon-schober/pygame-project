@@ -62,7 +62,7 @@ while True:
 
             # Initialize game objects
             enemies = [Enemy("assets/Enemy.obj")]
-            objects = [OBJ("assets/Castle.obj", scale=[3.0, 3.0, 3.0])]
+            objects = [OBJ("assets/Plane.obj")]
             player = Player(position=np.array([0.0, 0.0, 10.0]))
 
             # Generate all objects
