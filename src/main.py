@@ -25,7 +25,6 @@ credit_lines = [
     "", "", "♥ Thx for playing our Game ♥", "",
     "Press ESC-Key to go back to the menu"
 ]
-start_menu_scale = 1.03
 current_state_menu = "main"  # main, options, credits
 
 # State management
@@ -39,7 +38,7 @@ pygame.font.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
 pygame.display.set_caption(Game_name)
 screen_width, screen_height = screen.get_size()
-
+start_menu_scale = 1.03/900 * screen_height
 # Game clock
 clock = pygame.time.Clock()
 
@@ -50,9 +49,14 @@ player, enemies, objects = None, None, None
 
 spawn_interval = 2000  # Time in milliseconds
 last_spawn_time = pygame.time.get_ticks()  # Point in time of last spawn
+last_time = pygame.time.get_ticks()
+
+heal_time = 5000 # How long it takes so the player generate a new life (milliseconds)
+healing_number = 1 # How much does the player heal after the healtime ended
+hp_max = 200 # how much Hp can the Player have
 
 # Create font for the HP bar
-hp_font = pygame.font.Font(r"assets\StartMenu\Font\BLKCHCRY.TTF", int((200 // (screen_height * 0.00078125)) / 2))
+hp_font = pygame.font.Font(r"assets\StartMenu\Font\BLKCHCRY.TTF", 145)
 
 # Funktion zum Rendern von Text als OpenGL Textur
 import pygame
@@ -126,12 +130,12 @@ def render_text_and_image(screen_width, screen_height):
     hp_bar_field = pygame.transform.smoothscale(hp_bar_field,(int(screen_width * 0.32),int(hp_bar_field.get_height() * (screen_width * 0.32) / hp_bar_field.get_width())))
     render_2D_texture(hp_bar_field, 10, 10, screen_width, screen_height)
 
-    hp_surface = pygame.Surface((300, 20), pygame.SRCALPHA)
-    pygame.draw.rect(hp_surface, (238, 5, 6) if player.hp > 180 else (253, 211, 2) if player.hp > 140 else (254, 102, 5), (0, 0, 100, 20))
+    hp_surface = pygame.Surface((330, 55), pygame.SRCALPHA)
+    pygame.draw.rect(hp_surface, (238, 5, 6) if player.hp > 180 else (253, 211, 2) if player.hp > 100 else ((254, 102, 5) if player.hp > 45 else (70, 5, 5) ), (0, 0, 330 * (player.hp / hp_max), 55))
     render_2D_texture(hp_surface, 110, 100, screen_width, screen_height)
 
     crosshair = pygame.image.load('assets\crosshair.png').convert_alpha()
-    crosshair = pygame.transform.smoothscale(crosshair, (int(screen_width * 0.01),int(hp_bar_field.get_height() * (screen_width * 0.015) / hp_bar_field.get_width())))
+    crosshair = pygame.transform.smoothscale(crosshair, (int(screen_width * 0.01 ),int(hp_bar_field.get_height() * (screen_width * 0.015) / hp_bar_field.get_width())))
     render_2D_texture(crosshair, (screen_width - crosshair.get_width()) // 2, (screen_height - crosshair.get_height()) // 2, screen_width, screen_height)
     # Text rendern
     hp_font =pygame.font.Font('assets\StartMenu\Font\BLKCHCRY.TTF', int((175 // (screen_height * 0.00078125)) / 2))
@@ -153,7 +157,7 @@ while True:
 
             enemies = [Enemy("assets/Enemy.obj")]
             objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0])]
-            player = Player(position=np.array([0.0, 0.0, 10.0]))
+            player = Player(position=np.array([0.0, 0.0, 10.0]), hp= hp_max)
 
             for enemy in enemies:
                 enemy.generate()
@@ -174,8 +178,12 @@ while True:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         player.check_collision(enemies, dt)
-
+        
         current_time = pygame.time.get_ticks()
+        if current_time -last_time >= heal_time and player.hp + healing_number <= hp_max:
+            player.hp += healing_number
+            last_time = current_time
+
         if current_time - last_spawn_time >= spawn_interval:
             enemy = Enemy("assets/Enemy.obj", position=(np.random.random(3) * 200) - 100)
             enemy.generate()
