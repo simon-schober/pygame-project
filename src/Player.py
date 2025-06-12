@@ -7,36 +7,6 @@ from pygame import *
 
 from Hitbox import Hitbox
 
-
-def render_crosshair(screen_height, screen_width):
-    glDisable(GL_DEPTH_TEST)  # Deaktiviere Tiefentest für 2D-Rendering
-    glMatrixMode(GL_PROJECTION)
-    glPushMatrix()
-    glLoadIdentity()
-    glOrtho(0, screen_width, screen_height, 0, -1, 1)
-    glMatrixMode(GL_MODELVIEW)
-    glPushMatrix()
-    glLoadIdentity()
-
-    glLineWidth(2)  # Dicke der Linien
-    glColor3f(255.0, 255.0, 255.0)  # Farbe des Crosshairs (Weiß)
-
-    glBegin(GL_LINES)
-    # Horizontale Linie
-    glVertex3f(screen_width / 2 - 10, screen_height / 2, 0.0)  # Z-Wert auf 0.0 setzen
-    glVertex3f(screen_width / 2 + 10, screen_height / 2, 0.0)
-    # Vertikale Linie
-    glVertex3f(screen_width / 2, screen_height / 2 - 10, 0.0)
-    glVertex3f(screen_width / 2, screen_height / 2 + 10, 0.0)
-    glEnd()
-
-    glPopMatrix()
-    glMatrixMode(GL_PROJECTION)
-    glPopMatrix()
-    glMatrixMode(GL_MODELVIEW)
-    glEnable(GL_DEPTH_TEST)  # Reaktiviere Tiefentest
-
-
 class Player:
     def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1, floor=2.0,
                  direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),

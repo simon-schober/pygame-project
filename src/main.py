@@ -1,8 +1,12 @@
 from Enemy import *
 from OBJ import *
-from Player import Player, render_crosshair
+from Player import Player
 from graphics import init_graphics
 from start_menu import make_start_menu
+import pygame
+import numpy as np
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 # Menu variables
 Game_name = "Demise"
@@ -27,7 +31,7 @@ current_state_menu = "main"  # main, options, credits
 # State management
 current_state = "menu"
 
-# Initialize Pygame
+# Initialize Pygame and font
 pygame.init()
 pygame.font.init()
 
@@ -47,26 +51,110 @@ player, enemies, objects = None, None, None
 spawn_interval = 2000  # Time in milliseconds
 last_spawn_time = pygame.time.get_ticks()  # Point in time of last spawn
 
+# Create font for the HP bar
+hp_font = pygame.font.Font(r"assets\StartMenu\Font\BLKCHCRY.TTF", int((200 // (screen_height * 0.00078125)) / 2))
+
+# Funktion zum Rendern von Text als OpenGL Textur
+import pygame
+from OpenGL.GL import *
+
+
+def render_2D_texture(surface, x, y, screen_width, screen_height):
+    texture_data = pygame.image.tostring(surface, "RGBA", True)
+    width, height = surface.get_size()
+
+    # Hintergrundfarbe setzen, falls nicht geschehen (optional)
+    glClearColor(0.1, 0.1, 0.1, 1.0)  # Dunkelgrau statt Schwarz
+
+    # Zustand speichern
+    glPushAttrib(GL_ENABLE_BIT)
+
+    # Wichtig: Beleuchtung deaktivieren (falls aktiv)
+    glDisable(GL_LIGHTING)
+
+    # Tiefentest deaktivieren für 2D Overlays
+    glDisable(GL_DEPTH_TEST)
+
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data)
+    # Wechsel in 2D-Orthoprojektion
+    # Setting up a new projection matrix and setting it to Orthographic
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix() # Pushing a new matrix to the stack -> Creating a new one
+    glLoadIdentity() # Metaphorically settting matrix to 1
+    glOrtho(0, screen_width, screen_height, 0, -1, 1) # Setting up the Orthographic perspective (This is always done with multiplying)
+    # So we needed to set the matrix to 1 before
+
+    # Setting up a new modelview matrix
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix() 
+    glLoadIdentity()
+
+    glEnable(GL_TEXTURE_2D) # Enabling textures
+    glBindTexture(GL_TEXTURE_2D, texture_id) # Binding our texture to draw with
+    glBegin(GL_QUADS) # Start drawing
+
+    # Drawing a simple square
+    glTexCoord2f(0, 1); glVertex2f(x, y)
+    glTexCoord2f(1, 1); glVertex2f(x + width, y)
+    glTexCoord2f(1, 0); glVertex2f(x + width, y + height)
+    glTexCoord2f(0, 0); glVertex2f(x, y + height)
+
+    # Ending the drawing
+    glEnd()
+    glDisable(GL_TEXTURE_2D) # Disabling textures
+
+    # Popping the matrices we created before to continue drawing normally
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    glPopMatrix()
+
+    glDeleteTextures([texture_id])
+    glDisable(GL_BLEND)
+
+    # Vorherige OpenGL-Zustände wiederherstellen
+    glPopAttrib()
+
+def render_text_and_image(screen_width, screen_height):
+    hp_bar_field = pygame.image.load('assets\Hp_bar_texture.png').convert_alpha()
+    hp_bar_field = pygame.transform.smoothscale(hp_bar_field,(int(screen_width * 0.32),int(hp_bar_field.get_height() * (screen_width * 0.32) / hp_bar_field.get_width())))
+    render_2D_texture(hp_bar_field, 10, 10, screen_width, screen_height)
+
+    hp_surface = pygame.Surface((300, 20), pygame.SRCALPHA)
+    pygame.draw.rect(hp_surface, (238, 5, 6) if player.hp > 180 else (253, 211, 2) if player.hp > 140 else (254, 102, 5), (0, 0, 100, 20))
+    render_2D_texture(hp_surface, 110, 100, screen_width, screen_height)
+
+    crosshair = pygame.image.load('assets\crosshair.png').convert_alpha()
+    crosshair = pygame.transform.smoothscale(crosshair, (int(screen_width * 0.01),int(hp_bar_field.get_height() * (screen_width * 0.015) / hp_bar_field.get_width())))
+    render_2D_texture(crosshair, (screen_width - crosshair.get_width()) // 2, (screen_height - crosshair.get_height()) // 2, screen_width, screen_height)
+    # Text rendern
+    hp_font =pygame.font.Font('assets\StartMenu\Font\BLKCHCRY.TTF', int((175 // (screen_height * 0.00078125)) / 2))
+    text_surface = hp_font.render(f"{int(player.hp)}", True, (97, 93, 87))
+    render_2D_texture(text_surface, 270, 140, screen_width, screen_height)
+
+
 # Main loop
 pygame.mouse.set_visible(False)
 while True:
     if current_state == "menu":
-        # Render the start menu
         current_state = make_start_menu(screen, Game_name, option_lines, credit_lines, start_menu_scale,
                                         current_state_menu)
     elif current_state == "game":
         if not opengl_initialized:
-            # Initialize OpenGL context and settings
             screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.OPENGL | pygame.DOUBLEBUF)
             init_graphics((screen.get_width(), screen.get_height()))
             opengl_initialized = True
 
-            # Initialize game objects
             enemies = [Enemy("assets/Enemy.obj")]
             objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0])]
             player = Player(position=np.array([0.0, 0.0, 10.0]))
 
-            # Generate all objects
             for enemy in enemies:
                 enemy.generate()
             for _object in objects:
@@ -74,19 +162,15 @@ while True:
 
             pygame.mouse.set_visible(False)
 
-        # Handle OpenGL rendering
-        dt = clock.tick(60) / 1000.0  # Delta time in seconds
+        dt = clock.tick(60) / 1000.0
 
         player.handle_events(enemies)
-
-        # Handle keyboard input for movement
         player.compute_cam_direction()
         player.handle_walking_movement(dt)
-        player.apply_transformations()
         player.apply_gravity(dt)
+        player.apply_transformations()
         player.kill_if_dead()
 
-        # Render objects
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         player.check_collision(enemies, dt)
@@ -108,6 +192,19 @@ while True:
         for _object in objects:
             _object.render()
 
-        render_crosshair(screen_height, screen_width)
+        # Setup 2D projection für Overlay
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+        glOrtho(0, screen_width, screen_height, 0, -1, 1)
+        glMatrixMode(GL_MODELVIEW)
+        glPushMatrix()
+        glLoadIdentity()
 
+        glMatrixMode(GL_MODELVIEW)
+        glPopMatrix()
+        glMatrixMode(GL_PROJECTION)
+        glPopMatrix()
+
+        render_text_and_image(screen_width, screen_height)
         pygame.display.flip()

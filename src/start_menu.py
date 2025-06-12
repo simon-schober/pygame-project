@@ -2,7 +2,7 @@ import sys
 import pygame
 
 def scale_button(button, screen_width):
-    return pygame.transform.scale(button,(int(screen_width * 0.32),int(button.get_height() * (screen_width * 0.32) / button.get_width()),),)
+    return pygame.transform.scale(button,(int(screen_width * 0.32),int(button.get_height() * (screen_width * 0.32) / button.get_width())))
 
 def load_buttons(screen_width):
     #Load all the button pictures, and scale it
