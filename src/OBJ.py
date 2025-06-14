@@ -4,7 +4,7 @@ import numpy as np
 import pygame
 from OpenGL.GL import *
 
-from src.Hitbox import Hitbox
+from Hitbox import Hitbox
 
 
 class OBJ:

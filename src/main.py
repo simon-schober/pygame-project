@@ -161,8 +161,8 @@ while True:
             opengl_initialized = True
 
             enemies = [Enemy("assets/Enemy.obj")]
-            player = Player(position=np.array([0.0, 0.0, 10.0]), hp= hp_max, ammo = ammo_max)
-            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0]), OBJ("assets/pistol_new_texture.obj", scale = [5.0, 5.0, 5.0])]
+            player = Player(position=np.array([0.0, 15.0, 10.0]), hp= hp_max, ammo = ammo_max)
+            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=np.array([100.0, 1.0, 100.0])), OBJ("assets/pistol_new_texture.obj", scale = [5.0, 5.0, 5.0])]
 
 
             for enemy in enemies:
@@ -175,8 +175,8 @@ while True:
         dt = clock.tick(60) / 1000.0
 
         player.handle_events(enemies)
-        player.compute_cam_direction()
-        player.handle_walking_movement(dt)
+        player.handle_walking_movement(dt, objects)
+        player.compute_cam_direction(objects[1])
         player.apply_gravity(objects, dt)
         player.apply_transformations()
 
@@ -202,7 +202,7 @@ while True:
             enemy.move_to_target(player.position, dt)
             enemy.rotate_to_target(player.position)
             enemy.apply_gravity(objects, dt)
-            enemy.kill_if_dead(enemies)
+            enemy.kill_if_dead(enemies, player)
             enemy.hitbox.draw_hitbox((10.0, 10.0, 10.0))
             enemy.render()
             enemy.update_positions()
