@@ -23,7 +23,6 @@ class Enemy(OBJ):
         if np.any(direction_to_target):
             direction_to_target /= np.linalg.norm(direction_to_target)  # Normalize the vector
             self.position += direction_to_target * dt
-            self.hitbox.position = self.position
 
     def rotate_to_target(self, target_pos):
         direction_to_target = target_pos - self.position
@@ -32,15 +31,18 @@ class Enemy(OBJ):
             angle = -math.atan2(direction_to_target[2],
                                 direction_to_target[0])  # Berechnung des Winkels in der XZ-Ebene
             self.rotation[1] = math.degrees(angle)  # Setze die Y-Rotation des Feindes
-        self.hitbox.position = self.position
 
     def apply_gravity(self, dt):
         if self.position[1] > self.floor:
             self.position[1] -= self.gravity * dt
         if self.position[1] < self.floor:
             self.position[1] = self.floor
-        self.hitbox.position = self.position
 
-    def kill_if_dead(self, enemies):
+    def kill_if_dead(self, enemies, player):
         if not self.hp:
             enemies.remove(self)
+            if player.ammo <= 97:
+                player.ammo += 3
+
+    def update_positions(self):
+        self.hitbox.position = self.position
