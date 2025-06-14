@@ -13,7 +13,7 @@ def clamp(x, minimum, maximum):
 
 
 class Player:
-    def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=50, gravity=1,
+    def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=50, gravity=20,
                  direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),
                  hitbox_size=np.array([2.0, 4.0, 2.0]), hp=200.0, ammo=100,
                  velocity=np.array([0.0, 0.0, 0.0]), acceleration=np.array([0.0, 0.0, 0.0]), friction=1.0,
@@ -35,6 +35,7 @@ class Player:
         self.hitbox = Hitbox(position, hitbox_size)
         self.hp = hp
         self.ammo = ammo
+        self.jump_strength = 1.0  # Sprungkraft als Attribut
 
     def compute_cam_direction(self, gun):
         # Convert yaw and pitch to radians
@@ -115,11 +116,17 @@ class Player:
             move += self.right
         if keys[K_d]:
             move -= self.right
+        # Nur horizontale Bewegung erlauben (Y ignorieren)
+        move[1] = 0
         if np.linalg.norm(move) > 0:
             move = move / np.linalg.norm(move)
         self.acceleration = move * self.move_speed
 
         self.velocity += self.acceleration * dt
+        # SPRINGEN MIT LEERTASTE
+        if keys[K_SPACE] and self.on_ground:
+            self.velocity[1] = 25.0  # Sprungkraft, ggf. als Attribut setzen
+            self.on_ground = False
         self.velocity *= self.friction
         velocity_norm = np.linalg.norm(self.velocity)
         if velocity_norm > self.max_speed:
@@ -129,10 +136,25 @@ class Player:
         # self.position[1] bleibt unverändert
 
     def apply_gravity(self, objects, dt):
-        if np.any([self.hitbox.check_collision(_object.hitbox) for _object in objects]):
-            self.position[1] += dt
+        # Schwerkraft anwenden und Bodenkontrolle für Sprung
+        am_boden = False
+        for obj in objects:
+            if self.hitbox.check_collision(obj.hitbox):
+                am_boden = True
+                break
+        if am_boden:
+            if self.velocity[1] < 0:
+                self.velocity[1] = 0
+            self.on_ground = True
         else:
-            self.position[1] -= self.gravity * dt
+            self.velocity[1] -= self.gravity * dt
+            self.on_ground = False
+        self.position[1] += self.velocity[1] * dt
+        # Optional: Bodenhöhe (z.B. y=0) erzwingen
+        if self.position[1] < 0:
+            self.position[1] = 0
+            self.velocity[1] = 0
+            self.on_ground = True
 
     def check_collision(self, enemies, dt, pushback_multiplier=18):
         for enemy in enemies:
