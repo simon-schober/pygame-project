@@ -4,6 +4,8 @@ import numpy as np
 import pygame
 from OpenGL.GL import *
 
+from src.Hitbox import Hitbox
+
 
 class OBJ:
     generate_on_init = True
@@ -44,7 +46,7 @@ class OBJ:
         return contents
 
     def __init__(self, filename, position=np.zeros(3), rotation=np.zeros(3), scale=np.ones(3),
-                 swapyz=False):
+                 hitbox_size=np.array([1.0, 1.0, 1.0]), swapyz=False):
         """Loads a Wavefront OBJ file. """
         self.vertices = []
         self.normals = []
@@ -52,6 +54,7 @@ class OBJ:
         self.faces = []
         self.gl_list = 0
         dirname = os.path.dirname(filename)
+        self.hitbox = Hitbox(position, hitbox_size)
 
         material = None
         for line in open(filename, "r"):

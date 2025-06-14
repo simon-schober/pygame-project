@@ -2,19 +2,16 @@ import math
 
 import numpy as np
 
-from Hitbox import Hitbox
 from OBJ import OBJ
 
 
 class Enemy(OBJ):
     def __init__(self, filename, move_speed=1, gravity=1, position=np.zeros(3), rotation=np.zeros(3),
-                 scale=np.ones(3), floor=2.0, hitbox_size=np.array([3.4, 2, 3.4]),
+                 scale=np.ones(3), hitbox_size=np.array([3.4, 3.0, 3.4]),
                  hp=3, damage=1.0, swapyz=False):
-        super().__init__(filename, position, rotation, scale, swapyz)
+        super().__init__(filename, position, rotation, scale, hitbox_size, swapyz)
         self.gravity = gravity
         self.move_speed = move_speed
-        self.floor = floor
-        self.hitbox = Hitbox(position, hitbox_size)
         self.hp = hp
         self.damage = damage
 
@@ -34,12 +31,11 @@ class Enemy(OBJ):
             self.rotation[1] = math.degrees(angle)  # Setze die Y-Rotation des Feindes
         self.hitbox.position = self.position
 
-    def apply_gravity(self, dt):
-        if self.position[1] > self.floor:
+    def apply_gravity(self, objects, dt):
+        if np.any([self.hitbox.check_collision(_object.hitbox) for _object in objects]):
+            self.position[1] += dt
+        else:
             self.position[1] -= self.gravity * dt
-        if self.position[1] < self.floor:
-            self.position[1] = self.floor
-        self.hitbox.position = self.position
 
     def kill_if_dead(self, enemies):
         if not self.hp:
