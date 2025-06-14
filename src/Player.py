@@ -7,20 +7,26 @@ from pygame import *
 
 from Hitbox import Hitbox
 
+
 def clamp(x, minimum, maximum):
     return max(minimum, min(x, maximum))
 
+
 class Player:
-    def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1,
+    def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=50, gravity=1,
                  direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),
-                 hitbox_size=np.array([2.0, 4.0, 2.0]), hp=200.0, ammo = 100):
-        self.dx = 0
-        self.dy = 0
+                 hitbox_size=np.array([2.0, 4.0, 2.0]), hp=200.0, ammo=100,
+                 velocity=np.array([0.0, 0.0, 0.0]), acceleration=np.array([0.0, 0.0, 0.0]), friction=1.0,
+                 max_speed=500.0):
+        self.velocity = velocity  # Geschwindigkeit des Spielers
+        self.acceleration = acceleration  # Beschleunigung des Spielers
+        self.friction = friction  # Reibung, um die Geschwindigkeit zu reduzieren
+        self.max_speed = max_speed  # Maximale Geschwindigkeit
+        # Restliche Initialisierung
         self.rx = rx
         self.ry = ry
-        self.direction = [1.0, 0.0, 0.0]
-        self.position = position
         self.direction = direction
+        self.position = position
         self.up = up
         self.right = np.cross(self.direction, self.up)
         self.right = self.right / np.linalg.norm(self.right)
@@ -56,7 +62,6 @@ class Player:
         # Render the gun
         gun.render()
 
-
     def apply_transformations(self):
         # Clear buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -70,7 +75,7 @@ class Player:
     def handle_flying_movement(self, dt):
         keys = pygame.key.get_pressed()
 
-        # Movement
+        # Bewegung
         if keys[K_s]:
             self.position += self.direction * self.move_speed * dt
         if keys[K_w]:
@@ -98,30 +103,30 @@ class Player:
             elif e.type == MOUSEBUTTONDOWN and e.button == 1 and self.ammo > 0:  # Linke Maustaste
                 self.raycast_shoot(enemies)
 
-    def handle_walking_movement(self, dt, objects):
+    def handle_movement(self, dt):
         keys = pygame.key.get_pressed()
 
-        # Bewegung nur auf der XZ-Ebene (Y bleibt Höhe)
-        move_dir = np.array([self.direction[0], 0, self.direction[2]])
-        move_dir = move_dir / np.linalg.norm(move_dir)
-        right_dir = np.array([self.right[0], 0, self.right[2]])
-        right_dir = right_dir / np.linalg.norm(right_dir)
-        if keys[K_LCTRL]:
-            self.move_speed = 18
-        else:
-            self.move_speed = 10
-        if keys[K_s]:
-            self.position += move_dir * self.move_speed * dt
-            objects[1].position += move_dir *self.move_speed *dt
+        move = np.array([0.0, 0.0, 0.0])
         if keys[K_w]:
-            self.position -= move_dir * self.move_speed * dt
-            objects[1].position -= move_dir *self.move_speed *dt
-        if keys[K_d]:
-            self.position -= right_dir * self.move_speed * dt
-            objects[1].position -= right_dir *self.move_speed *dt
+            move -= self.direction
+        if keys[K_s]:
+            move += self.direction
         if keys[K_a]:
-            self.position += right_dir * self.move_speed * dt
-            objects[1].position += right_dir *self.move_speed *dt
+            move += self.right
+        if keys[K_d]:
+            move -= self.right
+        if np.linalg.norm(move) > 0:
+            move = move / np.linalg.norm(move)
+        self.acceleration = move * self.move_speed
+
+        self.velocity += self.acceleration * dt
+        self.velocity *= self.friction
+        velocity_norm = np.linalg.norm(self.velocity)
+        if velocity_norm > self.max_speed:
+            self.velocity = self.velocity / velocity_norm * self.max_speed
+        self.position[0] += self.velocity[0] * dt
+        self.position[2] += self.velocity[2] * dt
+        # self.position[1] bleibt unverändert
 
     def apply_gravity(self, objects, dt):
         if np.any([self.hitbox.check_collision(_object.hitbox) for _object in objects]):
@@ -140,7 +145,7 @@ class Player:
 
     def update_positions(self, gun):
         self.hitbox.position = self.position
-        gun.position = [self.position[0], self.position[1] -1.25, self.position[2]]
+        gun.position = [self.position[0], self.position[1] - 1.25, self.position[2]]
 
     def raycast_shoot(self, enemies):
         ray_origin = self.position
@@ -148,7 +153,7 @@ class Player:
         for enemy in enemies:
             if enemy.hitbox.check_ray_collision(ray_origin, -self.direction):
                 enemy.hp -= 1
-            
+
                 return True
         return False
 
