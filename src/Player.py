@@ -13,7 +13,7 @@ def clamp(x, minimum, maximum):
 class Player:
     def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1,
                  direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),
-                 hitbox_size=np.array([2.0, 2.0, 2.0]), hp=200.0, ammo = 100):
+                 hitbox_size=np.array([2.0, 4.0, 2.0]), hp=200.0, ammo = 100):
         self.dx = 0
         self.dy = 0
         self.rx = rx
