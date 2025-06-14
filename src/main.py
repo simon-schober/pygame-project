@@ -29,6 +29,7 @@ current_state = "menu"
 # Initialize Pygame and font
 pygame.init()
 pygame.font.init()
+pygame.mixer.init()
 
 # Initialize screen
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
@@ -149,6 +150,9 @@ def render_text_and_image(screen_width, screen_height):
     bullet_font = pygame.font.Font('assets/StartMenu/Font/BLKCHCRY.TTF', int((100 // (screen_height * 0.00078125)) / 2))
     text_surface = bullet_font.render(f"{int(player.ammo)}/{ammo_max}", True, (97, 93, 87))
     render_2D_texture(text_surface, screen_width - 300, 140, screen_width, screen_height)
+    # Magazin-Counter direkt darunter anzeigen
+    mag_surface = bullet_font.render(f"{int(player.mag_ammo)}/{int(player.mag_size)}", True, (200, 200, 200))
+    render_2D_texture(mag_surface, screen_width - 300, 180, screen_width, screen_height)
     bullet_pic = pygame.image.load("assets/ammo-rifle.png").convert_alpha()
     bullet_pic = pygame.transform.smoothscale(bullet_pic, (
         int(screen_width * 0.1), int(hp_bar_field.get_height() * (screen_width * 0.17) / hp_bar_field.get_width())))
@@ -181,7 +185,7 @@ while True:
 
         dt = clock.tick(60) / 1000.0
 
-        player.handle_events(enemies)
+        player.handle_events(enemies, dt)
         player.handle_movement(dt)
         player.compute_cam_direction(objects[1])
         player.apply_gravity(objects, dt)

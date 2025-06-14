@@ -138,7 +138,8 @@ class OBJ:
 
     def render(self):
         glPushMatrix()  # Save the current transformation state
-        glTranslatef(*self.position)  # Apply the object's translation
+        # Nutze die aktuelle Position (z.B. für Animationen)
+        glTranslatef(self.position[0], self.position[1], self.position[2])
         glRotatef(self.rotation[0], 1, 0, 0)  # Rotate around X-axis
         glRotatef(self.rotation[1], 0, 1, 0)  # Rotate around Y-axis
         glRotatef(self.rotation[2], 0, 0, 1)  # Rotate around Z-axis
