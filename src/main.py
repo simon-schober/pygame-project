@@ -3,10 +3,6 @@ from OBJ import *
 from Player import Player
 from graphics import init_graphics
 from start_menu import make_start_menu
-import pygame
-import numpy as np
-from OpenGL.GL import *
-from OpenGL.GLU import *
 
 # Menu variables
 Game_name = "Demise"
@@ -38,7 +34,7 @@ pygame.font.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
 pygame.display.set_caption(Game_name)
 screen_width, screen_height = screen.get_size()
-start_menu_scale = 1.03/900 * screen_height
+start_menu_scale = 1.03 / 900 * screen_height
 # Game clock
 clock = pygame.time.Clock()
 
@@ -51,9 +47,9 @@ spawn_interval = 2000  # Time in milliseconds
 last_spawn_time = pygame.time.get_ticks()  # Point in time of last spawn
 last_time = pygame.time.get_ticks()
 
-heal_time = 5000 # How long it takes so the player generate a new life (milliseconds)
-healing_number = 1 # How much does the player heal after the healtime ended
-hp_max = 200 # how much Hp can the Player have
+heal_time = 5000  # How long it takes so the player generate a new life (milliseconds)
+healing_number = 1  # How much does the player heal after the healtime ended
+hp_max = 200  # how much Hp can the Player have
 
 # Create font for the HP bar
 hp_font = pygame.font.Font(r"assets\StartMenu\Font\BLKCHCRY.TTF", 145)
@@ -89,29 +85,34 @@ def render_2D_texture(surface, x, y, screen_width, screen_height):
     # Wechsel in 2D-Orthoprojektion
     # Setting up a new projection matrix and setting it to Orthographic
     glMatrixMode(GL_PROJECTION)
-    glPushMatrix() # Pushing a new matrix to the stack -> Creating a new one
-    glLoadIdentity() # Metaphorically settting matrix to 1
-    glOrtho(0, screen_width, screen_height, 0, -1, 1) # Setting up the Orthographic perspective (This is always done with multiplying)
+    glPushMatrix()  # Pushing a new matrix to the stack -> Creating a new one
+    glLoadIdentity()  # Metaphorically settting matrix to 1
+    glOrtho(0, screen_width, screen_height, 0, -1,
+            1)  # Setting up the Orthographic perspective (This is always done with multiplying)
     # So we needed to set the matrix to 1 before
 
     # Setting up a new modelview matrix
     glMatrixMode(GL_MODELVIEW)
-    glPushMatrix() 
+    glPushMatrix()
     glLoadIdentity()
 
-    glEnable(GL_TEXTURE_2D) # Enabling textures
-    glBindTexture(GL_TEXTURE_2D, texture_id) # Binding our texture to draw with
-    glBegin(GL_QUADS) # Start drawing
+    glEnable(GL_TEXTURE_2D)  # Enabling textures
+    glBindTexture(GL_TEXTURE_2D, texture_id)  # Binding our texture to draw with
+    glBegin(GL_QUADS)  # Start drawing
 
     # Drawing a simple square
-    glTexCoord2f(0, 1); glVertex2f(x, y)
-    glTexCoord2f(1, 1); glVertex2f(x + width, y)
-    glTexCoord2f(1, 0); glVertex2f(x + width, y + height)
-    glTexCoord2f(0, 0); glVertex2f(x, y + height)
+    glTexCoord2f(0, 1);
+    glVertex2f(x, y)
+    glTexCoord2f(1, 1);
+    glVertex2f(x + width, y)
+    glTexCoord2f(1, 0);
+    glVertex2f(x + width, y + height)
+    glTexCoord2f(0, 0);
+    glVertex2f(x, y + height)
 
     # Ending the drawing
     glEnd()
-    glDisable(GL_TEXTURE_2D) # Disabling textures
+    glDisable(GL_TEXTURE_2D)  # Disabling textures
 
     # Popping the matrices we created before to continue drawing normally
     glMatrixMode(GL_PROJECTION)
@@ -125,20 +126,25 @@ def render_2D_texture(surface, x, y, screen_width, screen_height):
     # Vorherige OpenGL-Zustände wiederherstellen
     glPopAttrib()
 
+
 def render_text_and_image(screen_width, screen_height):
     hp_bar_field = pygame.image.load('assets\Hp_bar_texture.png').convert_alpha()
-    hp_bar_field = pygame.transform.smoothscale(hp_bar_field,(int(screen_width * 0.32),int(hp_bar_field.get_height() * (screen_width * 0.32) / hp_bar_field.get_width())))
+    hp_bar_field = pygame.transform.smoothscale(hp_bar_field, (
+        int(screen_width * 0.32), int(hp_bar_field.get_height() * (screen_width * 0.32) / hp_bar_field.get_width())))
     render_2D_texture(hp_bar_field, 10, 10, screen_width, screen_height)
 
     hp_surface = pygame.Surface((330, 55), pygame.SRCALPHA)
-    pygame.draw.rect(hp_surface, (238, 5, 6) if player.hp > 180 else (253, 211, 2) if player.hp > 100 else ((254, 102, 5) if player.hp > 45 else (70, 5, 5) ), (0, 0, 330 * (player.hp / hp_max), 55))
+    pygame.draw.rect(hp_surface, (238, 5, 6) if player.hp > 180 else (253, 211, 2) if player.hp > 100 else (
+        (254, 102, 5) if player.hp > 45 else (70, 5, 5)), (0, 0, 330 * (player.hp / hp_max), 55))
     render_2D_texture(hp_surface, 110, 100, screen_width, screen_height)
 
     crosshair = pygame.image.load('assets\crosshair.png').convert_alpha()
-    crosshair = pygame.transform.smoothscale(crosshair, (int(screen_width * 0.01 ),int(hp_bar_field.get_height() * (screen_width * 0.015) / hp_bar_field.get_width())))
-    render_2D_texture(crosshair, (screen_width - crosshair.get_width()) // 2, (screen_height - crosshair.get_height()) // 2, screen_width, screen_height)
+    crosshair = pygame.transform.smoothscale(crosshair, (
+        int(screen_width * 0.01), int(hp_bar_field.get_height() * (screen_width * 0.015) / hp_bar_field.get_width())))
+    render_2D_texture(crosshair, (screen_width - crosshair.get_width()) // 2,
+                      (screen_height - crosshair.get_height()) // 2, screen_width, screen_height)
     # Text rendern
-    hp_font =pygame.font.Font('assets\StartMenu\Font\BLKCHCRY.TTF', int((175 // (screen_height * 0.00078125)) / 2))
+    hp_font = pygame.font.Font('assets\StartMenu\Font\BLKCHCRY.TTF', int((175 // (screen_height * 0.00078125)) / 2))
     text_surface = hp_font.render(f"{int(player.hp)}", True, (97, 93, 87))
     render_2D_texture(text_surface, 270, 140, screen_width, screen_height)
 
@@ -156,8 +162,8 @@ while True:
             opengl_initialized = True
 
             enemies = [Enemy("assets/Enemy.obj")]
-            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0])]
-            player = Player(position=np.array([0.0, 0.0, 10.0]), hp= hp_max)
+            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=[1000.0, 1.0, 1000.0])]
+            player = Player(position=np.array([0.0, 10.0, 10.0]), hp=hp_max)
 
             for enemy in enemies:
                 enemy.generate()
@@ -171,16 +177,17 @@ while True:
         player.handle_events(enemies)
         player.compute_cam_direction()
         player.handle_walking_movement(dt)
-        player.apply_gravity(dt)
+        player.apply_gravity(objects, dt)
         player.apply_transformations()
+
         player.kill_if_dead()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         player.check_collision(enemies, dt)
-        
+
         current_time = pygame.time.get_ticks()
-        if current_time -last_time >= heal_time and player.hp + healing_number <= hp_max:
+        if current_time - last_time >= heal_time and player.hp + healing_number <= hp_max:
             player.hp += healing_number
             last_time = current_time
 
@@ -193,11 +200,13 @@ while True:
         for enemy in enemies:
             enemy.move_to_target(player.position, dt)
             enemy.rotate_to_target(player.position)
-            enemy.apply_gravity(dt)
+            enemy.apply_gravity(objects, dt)
             enemy.kill_if_dead(enemies)
+            enemy.hitbox.draw_hitbox((10.0, 10.0, 10.0))
             enemy.render()
 
         for _object in objects:
+            _object.hitbox.draw_hitbox((10.0, 10.0, 10.0))
             _object.render()
 
         # Setup 2D projection für Overlay
