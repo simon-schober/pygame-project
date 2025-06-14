@@ -7,10 +7,13 @@ from pygame import *
 
 from Hitbox import Hitbox
 
+def clamp(x, minimum, maximum):
+    return max(minimum, min(x, maximum))
+
 class Player:
     def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1, floor=2.0,
                  direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),
-                 hitbox_size=np.array([2.0, 2.0, 2.0]), hp=200.0):
+                 hitbox_size=np.array([2.0, 2.0, 2.0]), hp=200.0, ammo = 100):
         self.dx = 0
         self.dy = 0
         self.rx = rx
@@ -26,12 +29,14 @@ class Player:
         self.floor = floor
         self.hitbox = Hitbox(position, hitbox_size)
         self.hp = hp
+        self.ammo = ammo
 
-    def compute_cam_direction(self):
-        yaw_rad = np.radians(self.rx)  # player.rx
+    def compute_cam_direction(self, gun):
+        # Convert yaw and pitch to radians
+        yaw_rad = np.radians(self.rx)
         pitch_rad = np.radians(self.ry)
 
-        # Compute direction vector
+        # Compute direction vector based on yaw and pitch
         self.direction = np.array([
             np.cos(pitch_rad) * np.sin(yaw_rad),
             np.sin(pitch_rad),
@@ -43,6 +48,16 @@ class Player:
         self.right = np.cross(self.direction, self.up)
         self.right = self.right / np.linalg.norm(self.right)
 
+        # Set gun rotation: apply yaw and pitch
+        gun.rotation = [np.degrees(pitch_rad), np.degrees(yaw_rad), 0]
+
+        # Position gun relative to player
+        gun.position = self.position + np.array([-1.25, -0.5, 2.0])
+
+        # Render the gun
+        gun.render()
+
+
     def apply_transformations(self):
         # Clear buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -52,7 +67,6 @@ class Player:
         glRotatef(-self.ry, 1, 0, 0)
         glRotatef(-self.rx, 0, 1, 0)
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
-        self.hitbox.position = self.position
 
     def handle_flying_movement(self, dt):
         keys = pygame.key.get_pressed()
@@ -81,11 +95,11 @@ class Player:
             elif e.type == MOUSEMOTION:
                 self.dx, self.dy = e.rel
                 self.rx -= self.dx
-                self.ry -= self.dy
-            elif e.type == MOUSEBUTTONDOWN and e.button == 1:  # Linke Maustaste
+                self.ry = clamp(self.ry - self.dy, -90, 90)
+            elif e.type == MOUSEBUTTONDOWN and e.button == 1 and self.ammo > 0:  # Linke Maustaste
                 self.raycast_shoot(enemies)
 
-    def handle_walking_movement(self, dt):
+    def handle_walking_movement(self, dt, objects):
         keys = pygame.key.get_pressed()
 
         # Bewegung nur auf der XZ-Ebene (Y bleibt Höhe)
@@ -93,15 +107,22 @@ class Player:
         move_dir = move_dir / np.linalg.norm(move_dir)
         right_dir = np.array([self.right[0], 0, self.right[2]])
         right_dir = right_dir / np.linalg.norm(right_dir)
-
+        if keys[K_LCTRL]:
+            self.move_speed = 18
+        else:
+            self.move_speed = 10
         if keys[K_s]:
             self.position += move_dir * self.move_speed * dt
+            objects[1].position += move_dir *self.move_speed *dt
         if keys[K_w]:
             self.position -= move_dir * self.move_speed * dt
+            objects[1].position -= move_dir *self.move_speed *dt
         if keys[K_d]:
             self.position -= right_dir * self.move_speed * dt
+            objects[1].position -= right_dir *self.move_speed *dt
         if keys[K_a]:
             self.position += right_dir * self.move_speed * dt
+            objects[1].position += right_dir *self.move_speed *dt
 
     def apply_gravity(self, dt):
         if self.position[1] > self.floor:
@@ -118,12 +139,17 @@ class Player:
                 return True
         return False
 
+    def update_positions(self, gun):
+        self.hitbox.position = self.position
+        gun.position = [self.position[0], self.position[1] -1.25, self.position[2]]
+
     def raycast_shoot(self, enemies):
         ray_origin = self.position
-
+        self.ammo -= 1
         for enemy in enemies:
             if enemy.hitbox.check_ray_collision(ray_origin, -self.direction):
                 enemy.hp -= 1
+            
                 return True
         return False
 
