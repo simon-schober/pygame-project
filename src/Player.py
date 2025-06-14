@@ -7,10 +7,11 @@ from pygame import *
 
 from Hitbox import Hitbox
 
+
 class Player:
-    def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1, floor=2.0,
+    def __init__(self, position=np.array([0.0, 10.0, 0.0]), rx=0, ry=0, move_speed=10, gravity=1,
                  direction=np.array([1.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]),
-                 hitbox_size=np.array([2.0, 2.0, 2.0]), hp=200.0):
+                 hitbox_size=np.array([2.0, 4.0, 2.0]), hp=200.0):
         self.dx = 0
         self.dy = 0
         self.rx = rx
@@ -23,7 +24,6 @@ class Player:
         self.right = self.right / np.linalg.norm(self.right)
         self.move_speed = move_speed
         self.gravity = gravity
-        self.floor = floor
         self.hitbox = Hitbox(position, hitbox_size)
         self.hp = hp
 
@@ -103,11 +103,11 @@ class Player:
         if keys[K_a]:
             self.position += right_dir * self.move_speed * dt
 
-    def apply_gravity(self, dt):
-        if self.position[1] > self.floor:
+    def apply_gravity(self, objects, dt):
+        if np.any([self.hitbox.check_collision(_object.hitbox) for _object in objects]):
+            self.position[1] += dt
+        else:
             self.position[1] -= self.gravity * dt
-        if self.position[1] < self.floor:
-            self.position[1] = self.floor
 
     def check_collision(self, enemies, dt, pushback_multiplier=18):
         for enemy in enemies:
