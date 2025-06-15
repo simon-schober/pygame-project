@@ -42,7 +42,10 @@ class OBJ:
                 imagefile = os.path.join(dirname, mtl['map_Kd'])
                 mtl['texture_Kd'] = cls.loadTexture(imagefile)
             else:
-                mtl[values[0]] = list(map(float, values[1:]))
+                try:
+                    mtl[values[0]] = list(map(float, values[1:]))
+                except ValueError:
+                    mtl[values[0]] = values[1:]
         return contents
 
     def __init__(self, filename, position=np.zeros(3), rotation=np.zeros(3), scale=np.ones(3),

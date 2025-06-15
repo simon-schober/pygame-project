@@ -173,9 +173,10 @@ while True:
             opengl_initialized = True
 
             enemies = [Enemy("assets/OBJ/Enemy.obj")]
-            player = Player(position=np.array([0.0, 20.0, 10.0]), hp=hp_max, ammo=ammo_max)
+            player = Player(position=np.array([0.0, 30.0, 10.0]), hp=hp_max, ammo=ammo_max)
             objects = [OBJ("assets/OBJ/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=np.array([350.0, 1.0, 350.0])),
-                       OBJ("assets/OBJ/pistol_new_texture.obj", scale=[5.0, 5.0, 5.0])]
+                       OBJ("assets/OBJ/pistol_new_texture.obj", scale=[5.0, 5.0, 5.0]),
+                       OBJ("assets/OBJ/doom_test.obj", scale = [1.0, 1.0, 1.0])]
 
             for enemy in enemies:
                 enemy.generate()
