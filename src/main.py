@@ -11,8 +11,8 @@ option_lines = [
     "A          -->     Move Left", "", "S          -->     Move Backwards", "",
     "D          -->     Move Right", "", "Move Mouse  -->     Rotate your Character", "",
     "Left click -->     Shoot with Gun", "",
+    "R          -->     Reload the gun ammo",""
     "You can't change the Keybinds", "",
-    "Tip: You can always press ESC-Key ", "to leave the game (The score doesn't get saved)", "",
     "Press ESC-Key to go back to the menu"
 ]
 credit_lines = [
@@ -148,10 +148,10 @@ def render_text_and_image(screen_width, screen_height):
     render_2D_texture(text_surface, 270, 140, screen_width, screen_height)
     # Bullet_rander
     bullet_font = pygame.font.Font('assets/StartMenu/Font/BLKCHCRY.TTF', int((100 // (screen_height * 0.00078125)) / 2))
-    text_surface = bullet_font.render(f"{int(player.ammo)}/{ammo_max}", True, (97, 93, 87))
+    text_surface = bullet_font.render(f"{player.ammo}/{ammo_max}", True, (97, 93, 87))
     render_2D_texture(text_surface, screen_width - 300, 140, screen_width, screen_height)
     # Magazin-Counter direkt darunter anzeigen
-    mag_surface = bullet_font.render(f"{int(player.mag_ammo)}/{int(player.mag_size)}", True, (200, 200, 200))
+    mag_surface = bullet_font.render(f"{player.mag_ammo}/{int(player.mag_size)}", True, (200, 200, 200))
     render_2D_texture(mag_surface, screen_width - 300, 210, screen_width, screen_height)
     bullet_pic = pygame.image.load("assets/Game/ammo-rifle.png").convert_alpha()
     bullet_pic = pygame.transform.smoothscale(bullet_pic, (
