@@ -111,6 +111,7 @@ def credits_menu(screen, screen_width, screen_height, credits_lines):
 
 def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, current_state_menu):
     #Get the width and height of the window
+    button_click = pygame.mixer.Sound("assets/Sounds/button_click.mp3")
     screen_width, screen_height = screen.get_size()
 
     #Makes a new mouse texture
@@ -131,9 +132,12 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
         #Draw the background, mouse texture and text texture each frame
         screen.blit(start_bg_picture, (0, 0))
         screen.blit(text_with_texture, (((screen_width - text_with_texture.get_width()) // 2), 0))
+        was_clicked = False
+        which_button = None
         for i, button in enumerate(buttons[:len(buttons) - 1]):
             if ((screen_width - button.get_width()) // 2 +90 < mouse_pos[0] < (screen_width + button.get_width()) // 2 -75 and int(screen_height * 0.6 + i * screen_height * 0.17) - 280 < mouse_pos[1] < int(screen_height * 0.6 + i * screen_height * 0.17) - 140):
                 was_clicked = True
+                which_button = i
             #If the mouse is over the button, darken it and make it slightly bigger
                 darker_button = change_brightness(button, buttons, scale)
                 scaled_button = pygame.transform.smoothscale(button,(int(button.get_width() * scale),int(button.get_height() * scale)))
@@ -144,30 +148,30 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
             else:
                 #If the mouse is not over it, just draw the normal button
                 screen.blit(button,((int(screen_width - button.get_width()) // 2),(int(screen_height * 0.6 + i * screen_height * 0.17) - 350),))
-                was_clicked = False
             #Watch for any key presses
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-                elif event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
+            elif event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1 and was_clicked:
-                    #If we are on the main menu, look which button was clicked
-                    if current_state_menu == "main":
-                        if i == 0:  #"Play" button
-                            running = False
-                            return "game"
-                        elif i == 1:  #Options button
-                            current_state_menu = "options"
-                        elif i == 2:  #Credits button
-                            current_state_menu = "credits"
-                        elif i == 3:  #Quit button
-                            pygame.quit()
-                            sys.exit()
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1 and was_clicked and which_button != None:
+                button_click.play()
+                #If we are on the main menu, look which button was clicked
+                if current_state_menu == "main":
+                    if which_button == 0:  #"Play" button
+                        running = False
+                        return "game"
+                    elif which_button == 1:  #Options button
+                        current_state_menu = "options"
+                    elif which_button == 2:  #Credits button
+                        current_state_menu = "credits"
+                    elif which_button == 3:  #Quit button
+                        pygame.quit()
+                        sys.exit()
         if current_state_menu == "options":
             option_menu(screen, screen_width, screen_height, option_lines)
             current_state_menu = "main"

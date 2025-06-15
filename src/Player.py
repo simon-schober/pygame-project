@@ -23,7 +23,7 @@ def clamp(x, minimum, maximum):
 class Player:
     def __init__(self, position=None, rx=0, ry=0, move_speed=50, gravity=20,
                  direction=None, up=None, hitbox_size=None, hp=200.0, ammo=100,
-                 velocity=None, acceleration=None, friction=1.0, max_speed=500.0):
+                 velocity=None, acceleration=None, friction=0.8, max_speed=500.0):
         # Standardwerte für numpy-Arrays
         self.position = np.array([0.0, 10.0, 0.0]) if position is None else position
         self.direction = np.array([1.0, 0.0, 0.0]) if direction is None else direction
@@ -33,9 +33,6 @@ class Player:
         self.acceleration = np.array([0.0, 0.0, 0.0]) if acceleration is None else acceleration
         self.rx = rx
         self.ry = ry
-        self.position = position
-        self.direction = direction
-        self.up = up
         self.right = np.cross(self.direction, self.up)
         self.right = self.right / np.linalg.norm(self.right)
         self.move_speed = move_speed
@@ -52,21 +49,18 @@ class Player:
         self.godmode_sequence = []
         self.last_input_time = 0
         self.godmode_code = ['up', 'left', 'down', 'right']
-
-    def compute_cam_direction(self, gun):
-        # Convert yaw and pitch to radians
-        self.mag_size = 12
-        self.mag_ammo = self.mag_size
-        self.reserve_ammo = ammo - self.mag_size
-        self.jump_strength = 1.0
         self.footstep_sound = pygame.mixer.Sound('assets/Sounds/concrete-footsteps-6752.mp3')
         self.footstep_sound.set_volume(0.2)
         self.footstep_channel = pygame.mixer.Channel(1)
         self.shoot_channel = pygame.mixer.Channel(2)
+        self.hitbox = Hitbox(self.position, self.hitbox_size)
+        self.mag_size = 12
+        self.mag_ammo = self.mag_size
+        self.reserve_ammo = self.ammo - self.mag_size
+        self.jump_strength = 1.0
         self.gun_spin_angle = 0
         self.gun_spin_speed = 720
         self.gun_spin_current = 0
-        self.hitbox = Hitbox(self.position, self.hitbox_size)
         self.on_ground = False
 
     def compute_cam_direction(self, gun, dt=1 / 60):
@@ -147,6 +141,19 @@ class Player:
                     empty_sound = pygame.mixer.Sound('assets/Sounds/empty-gun-shot-6209.mp3')
                     empty_sound.set_volume(0.2)
                     self.shoot_channel.play(empty_sound)
+            if e.type == KEYDOWN:
+                if dt - self.last_input_time > 10000:
+                    self.godmode_sequence = []
+
+                self.last_input_time = dt
+                self.godmode_sequence.append(pygame.key.name(e.key))
+
+                # Trim to last 4 keys
+                self.godmode_sequence = self.godmode_sequence[-4:]
+                if self.godmode_sequence == self.godmode_code:
+                    self.god_mode()
+                    self.godmode_sequence = []
+
 
     def handle_movement(self, dt):
         """Verarbeitet die Bewegung des Spielers und die zugehörigen Sounds."""
@@ -192,16 +199,17 @@ class Player:
         """Wendet die Schwerkraft auf den Spieler an und überprüft die Bodenkontakt."""
         am_boden = False
         for obj in objects:
-            if self.hitbox.check_collision(obj.hitbox):
+            if self.hitbox.check_collision(obj.hitbox, self):
                 am_boden = True
                 break
-        if am_boden:
-            if self.velocity[1] < 0:
-                self.velocity[1] = 0
-            self.on_ground = True
-        else:
-            self.velocity[1] -= self.gravity * dt
-            self.on_ground = False
+        if not self.flyhack:
+            if am_boden:
+                if self.velocity[1] < 0:
+                    self.velocity[1] = 0
+                self.on_ground = True
+            else:
+                self.velocity[1] -= self.gravity * dt
+                self.on_ground = False
         self.position[1] += self.velocity[1] * dt
         # Optional: Bodenhöhe (z.B. y=0) erzwingen
         if self.position[1] < 0:
@@ -227,7 +235,8 @@ class Player:
     def raycast_shoot(self, enemies):
         ray_origin = self.position
         if self.mag_ammo > 0:
-            self.mag_ammo -= 1
+            if not self.infinity:
+                self.mag_ammo -= 1
             shoot_sound = pygame.mixer.Sound('assets/Sounds/pistol-shot.mp3')
             shoot_sound.set_volume(0.2)
             self.shoot_channel.play(shoot_sound)
@@ -245,7 +254,7 @@ class Player:
         nachzuladen = self.mag_size - self.mag_ammo
         nachgeladen = min(nachzuladen, self.ammo)
         if nachgeladen > 0:
-            reload_sound = pygame.mixer.Sound('assets/Sounds/1911-reload-6248.mp3')
+            reload_sound = pygame.mixer.Sound('assets/Sounds/reload.mp3')
             reload_sound.set_volume(0.3)
             self.shoot_channel.play(reload_sound)
         self.mag_ammo += nachgeladen
