@@ -18,7 +18,6 @@ class Player:
         self.dy = 0
         self.rx = rx
         self.ry = ry
-        self.direction = [1.0, 0.0, 0.0]
         self.position = position
         self.direction = direction
         self.up = up
@@ -29,6 +28,14 @@ class Player:
         self.hitbox = Hitbox(position, hitbox_size)
         self.hp = hp
         self.ammo = ammo
+        self.hitbox_cheat = False
+        self.flyhack = False
+        self.healhack = False
+        self.infinity = False
+        self.colider = False
+        self.godmode_sequence = []
+        self.last_input_time = 0
+        self.godmode_code = ['up', 'left', 'down', 'right']
 
     def compute_cam_direction(self, gun):
         # Convert yaw and pitch to radians
@@ -55,7 +62,13 @@ class Player:
 
         # Render the gun
         gun.render()
-
+    
+    def god_mode(self):
+            self.hitbox_cheat = True
+            self.flyhack = True
+            self.healhack = True
+            self.infinity = True
+            self.colider = True
 
     def apply_transformations(self):
         # Clear buffers
@@ -70,6 +83,10 @@ class Player:
     def handle_flying_movement(self, dt):
         keys = pygame.key.get_pressed()
 
+        if keys[K_LCTRL]:
+            self.move_speed = 18
+        else:
+            self.move_speed = 10
         # Movement
         if keys[K_s]:
             self.position += self.direction * self.move_speed * dt
@@ -84,19 +101,32 @@ class Player:
         if keys[K_LSHIFT]:
             self.position -= self.up * self.move_speed * dt
 
-    def handle_events(self, enemies):
+    def handle_events(self, enemies, now):
+        keys = pygame.key.get_pressed()
         # Event handling
         for e in pygame.event.get():
             if e.type == QUIT:
                 sys.exit()
-            elif e.type == KEYDOWN and e.key == K_ESCAPE:
+            if e.type == KEYDOWN and e.key == K_ESCAPE:
                 sys.exit()
-            elif e.type == MOUSEMOTION:
+            if e.type == MOUSEMOTION:
                 self.dx, self.dy = e.rel
                 self.rx -= self.dx
                 self.ry = clamp(self.ry - self.dy, -90, 90)
-            elif e.type == MOUSEBUTTONDOWN and e.button == 1 and self.ammo > 0:  # Linke Maustaste
+            if e.type == MOUSEBUTTONDOWN and e.button == 1 and self.ammo > 0:  # Linke Maustaste
                 self.raycast_shoot(enemies)
+            if e.type == KEYDOWN:
+                if now - self.last_input_time > 10000:
+                    self.godmode_sequence = []
+
+                self.last_input_time = now
+                self.godmode_sequence.append(pygame.key.name(e.key))
+
+                # Trim to last 4 keys
+                self.godmode_sequence = self.godmode_sequence[-4:]
+                if self.godmode_sequence == self.godmode_code:
+                    self.god_mode()
+                    self.godmode_sequence = []
 
     def handle_walking_movement(self, dt, objects):
         keys = pygame.key.get_pressed()
@@ -124,17 +154,19 @@ class Player:
             objects[1].position += right_dir *self.move_speed *dt
 
     def apply_gravity(self, objects, dt):
-        if np.any([self.hitbox.check_collision(_object.hitbox) for _object in objects]):
-            self.position[1] += dt
-        else:
-            self.position[1] -= self.gravity * dt
+        if not self.flyhack:
+            if np.any([self.hitbox.check_collision(_object.hitbox, self) for _object in objects]):
+                self.position[1] += dt
+            else:
+                self.position[1] -= self.gravity * dt
 
     def check_collision(self, enemies, dt, pushback_multiplier=18):
         for enemy in enemies:
             collision_vector = self.hitbox.get_collision_vector(enemy.hitbox)
             if collision_vector is not None:
                 self.position -= collision_vector * pushback_multiplier * dt  # Spieler wird im Kollisionsvektor zurückgeschoben
-                self.hp -= enemy.damage
+                if not self.healhack:
+                    self.hp -= enemy.damage
                 return True
         return False
 
@@ -144,7 +176,8 @@ class Player:
 
     def raycast_shoot(self, enemies):
         ray_origin = self.position
-        self.ammo -= 1
+        if not self.infinity:
+            self.ammo -= 1
         for enemy in enemies:
             if enemy.hitbox.check_ray_collision(ray_origin, -self.direction):
                 enemy.hp -= 1

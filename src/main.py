@@ -151,6 +151,7 @@ def render_text_and_image(screen_width, screen_height):
 # Main loop
 pygame.mouse.set_visible(False)
 while True:
+    current_time = pygame.time.get_ticks()
     if current_state == "menu":
         current_state = make_start_menu(screen, Game_name, option_lines, credit_lines, start_menu_scale,
                                         current_state_menu)
@@ -174,12 +175,14 @@ while True:
 
         dt = clock.tick(60) / 1000.0
 
-        player.handle_events(enemies)
-        player.handle_walking_movement(dt, objects)
+        player.handle_events(enemies, current_time)
+        if player.flyhack:
+            player.handle_flying_movement(dt)
+        else:
+            player.handle_walking_movement(dt, objects, ammo_max)
         player.compute_cam_direction(objects[1])
         player.apply_gravity(objects, dt)
         player.apply_transformations()
-
         player.kill_if_dead()
         player.update_positions(objects[1])
 
@@ -187,7 +190,6 @@ while True:
 
         player.check_collision(enemies, dt)
 
-        current_time = pygame.time.get_ticks()
         if current_time - last_time >= heal_time and player.hp + healing_number <= hp_max:
             player.hp += healing_number
             last_time = current_time
@@ -201,14 +203,16 @@ while True:
         for enemy in enemies:
             enemy.move_to_target(player.position, dt)
             enemy.rotate_to_target(player.position)
-            enemy.apply_gravity(objects, dt)
+            enemy.apply_gravity(objects, dt, player)
             enemy.kill_if_dead(enemies, player)
-            enemy.hitbox.draw_hitbox((10.0, 10.0, 10.0))
+            if player.hitbox_cheat:
+                enemy.hitbox.draw_hitbox((10.0, 10.0, 10.0))
             enemy.render()
             enemy.update_positions()
 
         for _object in objects:
-            _object.hitbox.draw_hitbox((10.0, 10.0, 10.0))
+            if player.hitbox_cheat:
+                _object.hitbox.draw_hitbox((10.0, 10.0, 10.0))
             _object.render()
 
         # Setup 2D projection für Overlay
