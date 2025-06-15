@@ -7,9 +7,12 @@ class Hitbox:
         self.position = np.array(position)  # Mittelpunkt der Hitbox
         self.size = np.array(size)  # Breite, Höhe, Tiefe der Hitbox
 
-    def check_collision(self, other_hitbox):
+    def check_collision(self, other_hitbox, player):
         # Überprüfen, ob sich die Hitboxen überlappen
-        return all(abs(self.position - other_hitbox.position) <= (self.size + other_hitbox.size) / 2)
+        if not player.colider:
+            return all(abs(self.position - other_hitbox.position) <= (self.size + other_hitbox.size) / 2)
+        else:
+            return False
 
     def draw_hitbox(self, color):
         x, y, z = self.position
