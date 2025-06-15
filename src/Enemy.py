@@ -29,17 +29,16 @@ class Enemy(OBJ):
                                 direction_to_target[0])  # Berechnung des Winkels in der XZ-Ebene
             self.rotation[1] = math.degrees(angle)  # Setze die Y-Rotation des Feindes
 
-    def apply_gravity(self, objects, dt):
-        if np.any([self.hitbox.check_collision(_object.hitbox) for _object in objects]):
-            self.position[1] += dt
-        else:
-            self.position[1] -= self.gravity * dt
+    def apply_gravity(self, objects, dt, player):
+        if not player.flyhack:
+            if np.any([self.hitbox.check_collision(_object.hitbox, player) for _object in objects]):
+                self.position[1] += dt
+            else:
+                self.position[1] -= self.gravity * dt
 
     def kill_if_dead(self, enemies, player):
         if not self.hp:
             enemies.remove(self)
-            if player.ammo <= 97:
-                player.ammo += 3
 
     def update_positions(self):
         self.hitbox.position = self.position
