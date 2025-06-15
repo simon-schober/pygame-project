@@ -23,7 +23,7 @@ def clamp(x, minimum, maximum):
 class Player:
     def __init__(self, position=None, rx=0, ry=0, move_speed=50, gravity=20,
                  direction=None, up=None, hitbox_size=None, hp=200.0, ammo=100,
-                 velocity=None, acceleration=None, friction=0.8, max_speed=500.0):
+                 velocity=None, acceleration=None, friction=0.9, max_speed=500.0):
         # Standardwerte für numpy-Arrays
         self.position = np.array([0.0, 10.0, 0.0]) if position is None else position
         self.direction = np.array([1.0, 0.0, 0.0]) if direction is None else direction
@@ -57,11 +57,14 @@ class Player:
         self.mag_size = 12
         self.mag_ammo = self.mag_size
         self.reserve_ammo = self.ammo - self.mag_size
+        self.mag_ammo_bevore = self.mag_ammo
+        self.ammo_bevore = self.ammo
         self.jump_strength = 1.0
         self.gun_spin_angle = 0
         self.gun_spin_speed = 720
         self.gun_spin_current = 0
         self.on_ground = False
+        self.mode = False
 
     def compute_cam_direction(self, gun, dt=1 / 60):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
@@ -84,11 +87,19 @@ class Player:
         gun.render()
     
     def god_mode(self):
-            self.hitbox_cheat = True
-            self.flyhack = True
-            self.healhack = True
-            self.infinity = True
-            self.colider = True
+            self.hitbox_cheat = self.mode
+            self.flyhack = self.mode
+            self.healhack = self.mode
+            self.infinity = self.mode
+            self.colider = self.mode
+            if self.mode:
+                self.ammo_bevore = self.ammo
+                self.mag_ammo_bevore = self.mag_ammo
+                self.ammo = "∞"
+                self.mag_ammo = "∞"
+            else:
+                self.ammo = self.ammo_bevore
+                self.mag_ammo = self.mag_ammo_bevore
 
     def apply_transformations(self):
         """Wendet die Transformationen für die Spielerposition und -richtung an."""
@@ -135,7 +146,7 @@ class Player:
                 self.rx -= self.dx
                 self.ry = clamp(self.ry - self.dy, -90, 90)
             elif e.type == MOUSEBUTTONDOWN and e.button == 1:
-                if self.mag_ammo > 0:
+                if self.mag_ammo == "∞" or self.mag_ammo > 0:
                     self.raycast_shoot(enemies)
                 else:
                     empty_sound = pygame.mixer.Sound('assets/Sounds/empty-gun-shot-6209.mp3')
@@ -151,6 +162,10 @@ class Player:
                 # Trim to last 4 keys
                 self.godmode_sequence = self.godmode_sequence[-4:]
                 if self.godmode_sequence == self.godmode_code:
+                    if self.mode:
+                        self.mode = False
+                    else:
+                        self.mode = True
                     self.god_mode()
                     self.godmode_sequence = []
 
@@ -234,7 +249,7 @@ class Player:
 
     def raycast_shoot(self, enemies):
         ray_origin = self.position
-        if self.mag_ammo > 0:
+        if self.mag_ammo == "∞" or self.mag_ammo > 0:
             if not self.infinity:
                 self.mag_ammo -= 1
             shoot_sound = pygame.mixer.Sound('assets/Sounds/pistol-shot.mp3')
@@ -251,11 +266,12 @@ class Player:
             sys.exit()
 
     def reload(self):
-        nachzuladen = self.mag_size - self.mag_ammo
-        nachgeladen = min(nachzuladen, self.ammo)
-        if nachgeladen > 0:
-            reload_sound = pygame.mixer.Sound('assets/Sounds/reload.mp3')
-            reload_sound.set_volume(0.3)
-            self.shoot_channel.play(reload_sound)
-        self.mag_ammo += nachgeladen
-        self.ammo -= nachgeladen
+        if not self.mag_ammo == "∞":
+            nachzuladen = self.mag_size - self.mag_ammo
+            nachgeladen = min(nachzuladen, self.ammo)
+            if nachgeladen > 0:
+                reload_sound = pygame.mixer.Sound('assets/Sounds/reload.mp3')
+                reload_sound.set_volume(0.3)
+                self.shoot_channel.play(reload_sound)
+            self.mag_ammo += nachgeladen
+            self.ammo -= nachgeladen
