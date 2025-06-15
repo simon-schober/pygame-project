@@ -55,7 +55,7 @@ ammo_max = 100
 max_enemies = 10
 
 # Create font for the HP bar
-hp_font = pygame.font.Font(r"assets\StartMenu\Font\BLKCHCRY.TTF", 145)
+hp_font = pygame.font.Font("assets/StartMenu/Font/BLKCHCRY.TTF", 145)
 
 
 def render_2D_texture(surface, x, y, screen_width, screen_height):
@@ -127,7 +127,7 @@ def render_2D_texture(surface, x, y, screen_width, screen_height):
 
 
 def render_text_and_image(screen_width, screen_height):
-    hp_bar_field = pygame.image.load('assets/Hp_bar_texture.png').convert_alpha()
+    hp_bar_field = pygame.image.load('assets/Game/Hp_bar_texture.png').convert_alpha()
     hp_bar_field = pygame.transform.smoothscale(hp_bar_field, (
         int(screen_width * 0.32), int(hp_bar_field.get_height() * (screen_width * 0.32) / hp_bar_field.get_width())))
     render_2D_texture(hp_bar_field, 10, 10, screen_width, screen_height)
@@ -137,7 +137,7 @@ def render_text_and_image(screen_width, screen_height):
         (138, 5, 6) if player.hp > 45 else (70, 5, 5)), (0, 0, 330 * (player.hp / hp_max), 55))
     render_2D_texture(hp_surface, 110, 100, screen_width, screen_height)
 
-    crosshair = pygame.image.load('assets/crosshair.png').convert_alpha()
+    crosshair = pygame.image.load('assets/Game/crosshair.png').convert_alpha()
     crosshair = pygame.transform.smoothscale(crosshair, (
         int(screen_width * 0.01), int(hp_bar_field.get_height() * (screen_width * 0.015) / hp_bar_field.get_width())))
     render_2D_texture(crosshair, (screen_width - crosshair.get_width()) // 2,
@@ -152,8 +152,8 @@ def render_text_and_image(screen_width, screen_height):
     render_2D_texture(text_surface, screen_width - 300, 140, screen_width, screen_height)
     # Magazin-Counter direkt darunter anzeigen
     mag_surface = bullet_font.render(f"{int(player.mag_ammo)}/{int(player.mag_size)}", True, (200, 200, 200))
-    render_2D_texture(mag_surface, screen_width - 300, 180, screen_width, screen_height)
-    bullet_pic = pygame.image.load("assets/ammo-rifle.png").convert_alpha()
+    render_2D_texture(mag_surface, screen_width - 300, 210, screen_width, screen_height)
+    bullet_pic = pygame.image.load("assets/Game/ammo-rifle.png").convert_alpha()
     bullet_pic = pygame.transform.smoothscale(bullet_pic, (
         int(screen_width * 0.1), int(hp_bar_field.get_height() * (screen_width * 0.17) / hp_bar_field.get_width())))
     render_2D_texture(bullet_pic, screen_width - 300, -10, screen_width, screen_height)
@@ -172,10 +172,10 @@ while True:
             init_graphics((screen.get_width(), screen.get_height()))
             opengl_initialized = True
 
-            enemies = [Enemy("assets/Enemy.obj")]
+            enemies = [Enemy("assets/OBJ/Enemy.obj")]
             player = Player(position=np.array([0.0, 20.0, 10.0]), hp=hp_max, ammo=ammo_max)
-            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=np.array([350.0, 1.0, 350.0])),
-                       OBJ("assets/pistol_new_texture.obj", scale=[5.0, 5.0, 5.0])]
+            objects = [OBJ("assets/OBJ/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=np.array([350.0, 1.0, 350.0])),
+                       OBJ("assets/OBJ/pistol_new_texture.obj", scale=[5.0, 5.0, 5.0])]
 
             for enemy in enemies:
                 enemy.generate()
@@ -206,7 +206,7 @@ while True:
             last_time = current_time
 
         if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
-            enemy = Enemy("assets/Enemy.obj", position=(np.random.random(3) * 200) - 100)
+            enemy = Enemy("assets/OBJ/Enemy.obj", position=(np.random.random(3) * 200) - 100)
             enemy.generate()
             enemies.append(enemy)
             last_spawn_time = current_time
