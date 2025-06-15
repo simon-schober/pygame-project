@@ -173,8 +173,8 @@ while True:
             opengl_initialized = True
 
             enemies = [Enemy("assets/Enemy.obj")]
-            player = Player(position=np.array([0.0, 15.0, 10.0]), hp=hp_max, ammo=ammo_max)
-            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=np.array([100.0, 1.0, 100.0])),
+            player = Player(position=np.array([0.0, 20.0, 10.0]), hp=hp_max, ammo=ammo_max)
+            objects = [OBJ("assets/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=np.array([350.0, 1.0, 350.0])),
                        OBJ("assets/pistol_new_texture.obj", scale=[5.0, 5.0, 5.0])]
 
             for enemy in enemies:
@@ -190,7 +190,7 @@ while True:
         if player.flyhack:
             player.handle_flying_movement(dt)
         else:
-            player.handle_walking_movement(dt, objects, ammo_max)
+            player.handle_movement(dt)
         player.compute_cam_direction(objects[1])
         player.apply_gravity(objects, dt)
         player.apply_transformations()
