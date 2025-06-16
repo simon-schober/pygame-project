@@ -85,21 +85,21 @@ class Player:
         if hasattr(self, 'reload_gun_rotation'):
             del self.reload_gun_rotation
         gun.render()
-    
+
     def god_mode(self):
-            self.hitbox_cheat = self.mode
-            self.flyhack = self.mode
-            self.healhack = self.mode
-            self.infinity = self.mode
-            self.colider = self.mode
-            if self.mode:
-                self.ammo_bevore = self.ammo
-                self.mag_ammo_bevore = self.mag_ammo
-                self.ammo = "∞"
-                self.mag_ammo = "∞"
-            else:
-                self.ammo = self.ammo_bevore
-                self.mag_ammo = self.mag_ammo_bevore
+        self.hitbox_cheat = self.mode
+        self.flyhack = self.mode
+        self.healhack = self.mode
+        self.infinity = self.mode
+        self.colider = not self.mode  # Kollisionen im Godmode deaktivieren
+        if self.mode:
+            self.ammo_bevore = self.ammo
+            self.mag_ammo_bevore = self.mag_ammo
+            self.ammo = "∞"
+            self.mag_ammo = "∞"
+        else:
+            self.ammo = self.ammo_bevore
+            self.mag_ammo = self.mag_ammo_bevore
 
     def apply_transformations(self):
         """Wendet die Transformationen für die Spielerposition und -richtung an."""
@@ -144,7 +144,7 @@ class Player:
             elif e.type == MOUSEMOTION:
                 self.dx, self.dy = e.rel
                 self.rx -= self.dx
-                # self.ry = clamp(self.ry - self.dy, -90, 90)
+                self.ry = 0.000000000001
             elif e.type == MOUSEBUTTONDOWN and e.button == 1:
                 if self.mag_ammo == "∞" or self.mag_ammo > 0:
                     self.raycast_shoot(enemies)
@@ -168,7 +168,6 @@ class Player:
                         self.mode = True
                     self.god_mode()
                     self.godmode_sequence = []
-
 
     def handle_movement(self, dt):
         """Verarbeitet die Bewegung des Spielers und die zugehörigen Sounds."""
@@ -234,6 +233,8 @@ class Player:
 
     def check_collision(self, enemies, dt, pushback_multiplier=18):
         """Überprüft Kollisionen mit Feinden und wendet ggf. Rückstoß an."""
+        if self.mode:  # Godmode: keine Kollisionen
+            return False
         for enemy in enemies:
             collision_vector = self.hitbox.get_collision_vector(enemy.hitbox)
             if collision_vector is not None:

@@ -11,8 +11,8 @@ option_lines = [
     "A          -->     Move Left", "", "S          -->     Move Backwards", "",
     "D          -->     Move Right", "", "Move Mouse  -->     Rotate your Character", "",
     "Left click -->     Shoot with Gun", "",
-    "R          -->     Reload the gun ammo",""
-    "You can't change the Keybinds", "",
+    "R          -->     Reload the gun ammo", ""
+                                              "You can't change the Keybinds", "",
     "Press ESC-Key to go back to the menu"
 ]
 credit_lines = [
@@ -129,7 +129,8 @@ def render_2D_texture(surface, x, y, screen_width, screen_height):
 def render_text_and_image(screen_width, screen_height):
     hp_bar_field = pygame.image.load('assets/Game/Hp_bar_texture.png').convert_alpha()
     hp_bar_field = pygame.transform.smoothscale(hp_bar_field, (
-        int(screen_width * 0.32), int(hp_bar_field.get_height() * (screen_width * 0.32) / hp_bar_field.get_width())))
+        int(screen_width * (start_menu_scale - 1)),
+        int(hp_bar_field.get_height() * (screen_width * (start_menu_scale - 1)) / hp_bar_field.get_width())))
     render_2D_texture(hp_bar_field, 10, 10, screen_width, screen_height)
 
     hp_surface = pygame.Surface((330, 55), pygame.SRCALPHA)
@@ -175,8 +176,8 @@ while True:
             enemies = [Enemy("assets/OBJ/Enemy.obj")]
             player = Player(position=np.array([0.0, 30.0, 10.0]), hp=hp_max, ammo=ammo_max)
             objects = [OBJ("assets/OBJ/Plane.obj", scale=[3.0, 3.0, 3.0], hitbox_size=np.array([350.0, 1.0, 350.0])),
-                       OBJ("assets/OBJ/pistol_new_texture.obj", scale=[5.0, 5.0, 5.0]),
-                       OBJ("assets/OBJ/doom_test.obj", scale = [1.0, 1.0, 1.0])]
+                       OBJ("assets/OBJ/pistol_new_texture.obj", scale=[5.0, 5.0, 5.0], hitbox_size=[0.0, 0.0, 0.0]),
+                       OBJ("assets/OBJ/doom_test.obj", scale=[0.0, 0.0, 0.0], hitbox_size=[0.0, 0.0, 0.0])]
 
             for enemy in enemies:
                 enemy.generate()
