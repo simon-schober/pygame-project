@@ -144,7 +144,7 @@ class Player:
             elif e.type == MOUSEMOTION:
                 self.dx, self.dy = e.rel
                 self.rx -= self.dx
-                self.ry = clamp(self.ry - self.dy, -90, 90)
+                # self.ry = clamp(self.ry - self.dy, -90, 90)
             elif e.type == MOUSEBUTTONDOWN and e.button == 1:
                 if self.mag_ammo == "∞" or self.mag_ammo > 0:
                     self.raycast_shoot(enemies)

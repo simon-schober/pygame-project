@@ -35,7 +35,7 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
 pygame.display.set_caption(Game_name)
 screen_width, screen_height = screen.get_size()
-start_menu_scale = 1.03 / 900 * screen_height
+start_menu_scale = (1.03 / 900) * screen_height
 # Game clock
 clock = pygame.time.Clock()
 
