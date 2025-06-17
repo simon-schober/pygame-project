@@ -6,6 +6,7 @@ Dieses Modul enthält die Player-Klasse für das Spiel.
 """
 
 import sys
+from copy import copy
 
 import numpy as np
 import pygame
@@ -20,10 +21,78 @@ def clamp(x, minimum, maximum):
     return max(minimum, min(x, maximum))
 
 
+def render_2D_texture(surface, x, y, screen_width, screen_height):
+    texture_data = pygame.image.tostring(surface, "RGBA", True)
+    width, height = surface.get_size()
+
+    # Hintergrundfarbe setzen, falls nicht geschehen (optional)
+    glClearColor(0.1, 0.1, 0.1, 1.0)  # Dunkelgrau statt Schwarz
+
+    # Zustand speichern
+    glPushAttrib(GL_ENABLE_BIT)
+
+    # Wichtig: Beleuchtung deaktivieren (falls aktiv)
+    glDisable(GL_LIGHTING)
+
+    # Tiefentest deaktivieren für 2D Overlays
+    glDisable(GL_DEPTH_TEST)
+
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data)
+    # Wechsel in 2D-Orthoprojektion
+    # Setting up a new projection matrix and setting it to Orthographic
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()  # Pushing a new matrix to the stack -> Creating a new one
+    glLoadIdentity()  # Metaphorically settting matrix to 1
+    glOrtho(0, screen_width, screen_height, 0, -1,
+            1)  # Setting up the Orthographic perspective (This is always done with multiplying)
+    # So we needed to set the matrix to 1 before
+
+    # Setting up a new modelview matrix
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    glEnable(GL_TEXTURE_2D)  # Enabling textures
+    glBindTexture(GL_TEXTURE_2D, texture_id)  # Binding our texture to draw with
+    glBegin(GL_QUADS)  # Start drawing
+
+    # Drawing a simple square
+    glTexCoord2f(0, 1);
+    glVertex2f(x, y)
+    glTexCoord2f(1, 1);
+    glVertex2f(x + width, y)
+    glTexCoord2f(1, 0);
+    glVertex2f(x + width, y + height)
+    glTexCoord2f(0, 0);
+    glVertex2f(x, y + height)
+
+    # Ending the drawing
+    glEnd()
+    glDisable(GL_TEXTURE_2D)  # Disabling textures
+
+    # Popping the matrices we created before to continue drawing normally
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    glPopMatrix()
+
+    glDeleteTextures([texture_id])
+    glDisable(GL_BLEND)
+
+    # Vorherige OpenGL-Zustände wiederherstellen
+    glPopAttrib()
+
+
 class Player:
     def __init__(self, position=None, rx=0, ry=0, move_speed=50, gravity=20,
                  direction=None, up=None, hitbox_size=None, hp=200.0, ammo=100,
-                 velocity=None, acceleration=None, friction=0.9, max_speed=500.0):
+                 velocity=None, acceleration=None, friction=1.0, max_speed=500.0):
         # Standardwerte für numpy-Arrays
         self.position = np.array([0.0, 10.0, 0.0]) if position is None else position
         self.direction = np.array([1.0, 0.0, 0.0]) if direction is None else direction
@@ -65,6 +134,7 @@ class Player:
         self.gun_spin_current = 0
         self.on_ground = False
         self.mode = False
+        self.end = False
 
     def compute_cam_direction(self, gun, dt=1 / 60):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
@@ -238,7 +308,9 @@ class Player:
         for enemy in enemies:
             collision_vector = self.hitbox.get_collision_vector(enemy.hitbox)
             if collision_vector is not None:
-                self.position -= collision_vector * pushback_multiplier * dt  # Spieler wird im Kollisionsvektor zurückgeschoben
+                collision_vector[
+                    1] = 0  # Y-Komponente ignorieren, damit der Spieler nicht nach oben/unten gedrückt wird
+                self.position -= collision_vector * pushback_multiplier * dt
                 if not self.healhack:
                     self.hp -= enemy.damage
                 return True
@@ -246,7 +318,18 @@ class Player:
 
     def update_positions(self, gun):
         self.hitbox.position = self.position
-        gun.position = [self.position[0], self.position[1] - 1.25, self.position[2]]
+        # Offset für klassische Ego-Shooter-Ansicht, weiter nach vorne
+        vor_offset = -2  # weiter nach vorne
+        rechts_offset = -1.5  # nach rechts
+        unten_offset = -0.7  # nach unten (negativ = nach unten)
+        gun.position = [
+            self.position[0] + self.direction[0] * vor_offset + self.right[0] * rechts_offset + self.up[
+                0] * unten_offset,
+            self.position[1] + self.direction[1] * vor_offset + self.right[1] * rechts_offset + self.up[
+                1] * unten_offset,
+            self.position[2] + self.direction[2] * vor_offset + self.right[2] * rechts_offset + self.up[
+                2] * unten_offset,
+        ]
 
     def raycast_shoot(self, enemies):
         ray_origin = self.position
@@ -254,7 +337,7 @@ class Player:
             if not self.infinity:
                 self.mag_ammo -= 1
             shoot_sound = pygame.mixer.Sound('assets/Sounds/pistol-shot.mp3')
-            shoot_sound.set_volume(0.2)
+            shoot_sound.set_volume(1.0)  # Lautstärke auf Maximum setzen
             self.shoot_channel.play(shoot_sound)
             for enemy in enemies:
                 if enemy.hitbox.check_ray_collision(ray_origin, -self.direction):
@@ -262,9 +345,28 @@ class Player:
                     return True
         return False
 
-    def kill_if_dead(self):
-        if not self.hp:
-            sys.exit()
+    def kill_if_dead(self, screen_width, screen_height, start_time):
+        if self.hp <= 0 and not self.end:
+            glClearColor(0.0, 0.0, 0.0, 1.0)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            pygame.mixer.music.stop()
+            self.end = True
+            self.life_time = copy(pygame.time.get_ticks()) - start_time
+        if self.end:
+            life_font = pygame.font.Font('assets/StartMenu/Font/BLKCHCRY.TTF',
+                                         int((150 // (screen_height * 0.00078125)) / 2))
+            s = (self.life_time // 1000) % 60
+            m = (s // 60) % 60
+            h = m // 60
+            life = life_font.render(f'Time you survived:', True,
+                                    (132, 8, 0))
+            life_time = life_font.render(f'{h:02}:{m:02}:{s:02}', True, (132, 8, 0))
+            render_2D_texture(life, screen_width // 2 - life.get_width() // 2, screen_height // 2 - 100, screen_width,
+                              screen_height)
+            render_2D_texture(life_time, screen_width // 2 // 2, screen_height // 2,
+                              screen_width,
+                              screen_height)
+            pygame.display.flip()
 
     def reload(self):
         if not self.mag_ammo == "∞":

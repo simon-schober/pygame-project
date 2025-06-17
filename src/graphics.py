@@ -7,7 +7,8 @@ def init_graphics(viewport):
     glViewport(0, 0, viewport[0], viewport[1])
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(90.0, viewport[0] / float(viewport[1]), 1, 100.0)
+    # Render-Distanz-Limit entfernen ("far"-Wert sehr hoch setzen)
+    gluPerspective(90.0, viewport[0] / float(viewport[1]), 1, 100000.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
