@@ -90,9 +90,9 @@ def render_2D_texture(surface, x, y, screen_width, screen_height):
 
 
 class Player:
-    def __init__(self, position=None, rx=0, ry=0, move_speed=50, gravity=20,
+    def __init__(self, position=None, rx=0, ry=0, move_speed=50, gravity=35,
                  direction=None, up=None, hitbox_size=None, hp=200.0, ammo=100,
-                 velocity=None, acceleration=None, friction=0.95, max_speed=500.0):
+                 velocity=None, acceleration=None, friction=0.975, max_speed=500.0):
         # Standardwerte für numpy-Arrays
         self.position = np.array([0.0, 10.0, 0.0]) if position is None else position
         self.direction = np.array([1.0, 0.0, 0.0]) if direction is None else direction
@@ -128,7 +128,7 @@ class Player:
         self.reserve_ammo = self.ammo - self.mag_size
         self.mag_ammo_bevore = self.mag_ammo
         self.ammo_bevore = self.ammo
-        self.jump_strength = 1.5
+        self.jump_strength = 1.3
         self.gun_spin_angle = 0
         self.gun_spin_speed = 720
         self.gun_spin_current = 0
