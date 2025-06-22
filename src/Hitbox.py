@@ -20,45 +20,42 @@ class Hitbox:
         dy = self.size[1] / 2
         dz = self.size[2] / 2
 
-        # Aktivieren des Drahtgittermodus
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-        glColor3f(*color)  # Rot für die Hitbox
+        glColor3f(*color)
 
-        # Zeichne die Box
         glBegin(GL_QUADS)
-        # Unterseite
+
         glVertex3f(x - dx, y - dy, z - dz)
         glVertex3f(x + dx, y - dy, z - dz)
         glVertex3f(x + dx, y - dy, z + dz)
         glVertex3f(x - dx, y - dy, z + dz)
-        # Oberseite
+
         glVertex3f(x - dx, y + dy, z - dz)
         glVertex3f(x + dx, y + dy, z - dz)
         glVertex3f(x + dx, y + dy, z + dz)
         glVertex3f(x - dx, y + dy, z + dz)
-        # Vorderseite
+
         glVertex3f(x - dx, y - dy, z + dz)
         glVertex3f(x + dx, y - dy, z + dz)
         glVertex3f(x + dx, y + dy, z + dz)
         glVertex3f(x - dx, y + dy, z + dz)
-        # Rückseite
+
         glVertex3f(x - dx, y - dy, z - dz)
         glVertex3f(x + dx, y - dy, z - dz)
         glVertex3f(x + dx, y + dy, z - dz)
         glVertex3f(x - dx, y + dy, z - dz)
-        # Rechte Seite
+
         glVertex3f(x + dx, y - dy, z - dz)
         glVertex3f(x + dx, y - dy, z + dz)
         glVertex3f(x + dx, y + dy, z + dz)
         glVertex3f(x + dx, y + dy, z - dz)
-        # Linke Seite
+
         glVertex3f(x - dx, y - dy, z - dz)
         glVertex3f(x - dx, y - dy, z + dz)
         glVertex3f(x - dx, y + dy, z + dz)
         glVertex3f(x - dx, y + dy, z - dz)
         glEnd()
 
-        # Zurücksetzen des Polygonmodus
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
     def get_collision_vector(self, other_hitbox):
@@ -75,13 +72,11 @@ class Hitbox:
         # Prüfen, ob die Überlappung in allen Dimensionen größer als 0 ist
         # np.all(overlap > 0) bedeutet, dass in allen Koordinatenachsen eine Überlappung besteht
         if np.all(overlap > 0):
-            # Berechnung des Kollisionsvektors:
-            # np.sign(delta) gibt für jede Komponente +1 oder -1 zurück, je nachdem, in welche Richtung die andere Hitbox liegt
-            # Multipliziert mit overlap, gibt dies den Vektor der minimalen Verschiebung, 
-            # um die Hitboxen aus der Überlappung zu bringen
-            collision_vector = np.sign(delta) * overlap
-
-            # Rückgabe des Kollisionsvektors, der Richtung und Stärke der Kollision repräsentiert
+            # Nur die Achse mit der geringsten Überlappung bestimmen
+            min_overlap_axis = np.argmin(overlap)
+            collision_vector = np.zeros_like(delta)
+            # Richtung beibehalten, aber nur auf der minimalen Achse verschieben
+            collision_vector[min_overlap_axis] = np.sign(delta[min_overlap_axis]) * overlap[min_overlap_axis]
             return collision_vector
 
         # Wenn keine Überlappung in allen Dimensionen vorliegt, keine Kollision => Rückgabe None

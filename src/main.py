@@ -32,9 +32,6 @@ pygame.font.init()
 pygame.mixer.init()
 
 # Musik abspielen: DEMISE.wav im Hintergrund und in Dauerschleife
-pygame.mixer.music.load('assets/Sounds/DEMISE.wav')
-pygame.mixer.music.set_volume(0.2)  # Lautstärke auf 80%
-pygame.mixer.music.play(-1)  # -1 = Endlosschleife
 # Initialize screen
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
 pygame.display.set_caption(Game_name)
@@ -56,7 +53,7 @@ heal_time = 5000  # How long it takes so the player generate a new life (millise
 healing_number = 1  # How much does the player heal after the healtime ended
 hp_max = 200  # how much Hp can the Player have
 ammo_max = 100
-max_enemies = 10
+max_enemies = 1000
 
 # Create font for the HP bar
 hp_font = pygame.font.Font("assets/StartMenu/Font/BLKCHCRY.TTF", 145)
@@ -130,16 +127,36 @@ while True:
             opengl_initialized = True
 
             enemies = [Enemy("assets/OBJ/Enemy.obj")]
-            player = Player(position=np.array([0.0, 40.0, 10.0]), hp=hp_max, ammo=ammo_max)
-            objects = [OBJ("assets/OBJ/Map.obj", scale=[2.0, 2.0, 2.0], hitbox_size=np.array([350.0, 1.0, 350.0])),
+            untitled_obj = OBJ("assets/OBJ/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
+            untitled_obj.generate()
+            objects = [untitled_obj,
                        OBJ("assets/OBJ/shotgun.obj", scale=[0.25, 0.25, 0.25], hitbox_size=[0.0, 0.0, 0.0],
-                           rotation=[90.0, 0.0, 0.0]),
-                       OBJ("assets/OBJ/doom_test.obj", scale=[0.0, 0.0, 0.0], hitbox_size=[0.0, 0.0, 0.0])]
+                           rotation=[90.0, 0.0, 0.0])]
+            player = Player(position=np.array([-109.50993, 0.0, 109.5]), hp=hp_max, ammo=ammo_max)
+            hitboxes_map = [
+                Hitbox(position=np.array([-193.237, 10.0756, 112.126]), size=np.array([23.687, 60.6338, 175.9088])),
+                Hitbox(position=np.array([-19.7332, 10.0756, 112.126]), size=np.array([23.687, 60.6338, 175.90882])),
+                Hitbox(position=np.array([-100.0, 10.0756, 22.0]), size=np.array([175.90882, 60.6338, 23.687])),
+                Hitbox(position=np.array([-100.0, 10.0756, 195.0]), size=np.array([175.90882, 60.6338, 23.687])),
+                Hitbox(position=np.array([-141.76, 3.2, 110.510933]), size=np.array([21.5, 15.5, 21.5])),
+                Hitbox(position=np.array([-74.1163, 3.2, 110.510933]), size=np.array([21.5, 15.5, 21.5])),
+                Hitbox(position=np.array([-108.50993, 9.7, 110.510933]), size=np.array([50.5, 1.0, 8.5])),
+                Hitbox(position=np.array([-109.50993, 1.5, 53.5]), size=np.array([24.0, 9.55143, 2.8])),
+                Hitbox(position=np.array([-109.50993, 1.5, 164.5]), size=np.array([24.0, 9.55143, 2.8]))
+            ]
 
             for enemy in enemies:
                 enemy.generate()
             for _object in objects:
                 _object.generate()
+            for hitbox_map in hitboxes_map:
+                objects.append(hitbox_map)
+
+            vertices = np.array(untitled_obj.vertices)
+            min_x = vertices[:, 0].min()
+            max_x = vertices[:, 0].max()
+            breite = (max_x - min_x) * untitled_obj.scale[0] - 10.0
+            spawn_max_range = breite
 
             pygame.mouse.set_visible(False)
 
@@ -149,26 +166,36 @@ while True:
         if player.flyhack:
             player.handle_flying_movement(dt)
         else:
-            player.handle_movement(dt)
+            player.handle_movement(dt, hitboxes_map)
         player.compute_cam_direction(objects[1])
-        player.apply_gravity(objects, dt)
+        player.apply_gravity(hitboxes_map, dt)
         player.apply_transformations()
         player.kill_if_dead(screen_width, screen_height, start_time)
         player.update_positions(objects[1])
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        player.check_collision(enemies, dt)
+        player.check_collision(enemies, dt, 18)
 
         if current_time - last_time >= heal_time and player.hp + healing_number <= hp_max:
             player.hp += healing_number
             last_time = current_time
 
-        if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
-            enemy = Enemy("assets/OBJ/Enemy.obj", position=(np.random.random(3) * 200) - 100)
-            enemy.generate()
-            enemies.append(enemy)
-            last_spawn_time = current_time
+        # if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
+        #     max_range = 100
+        #     if not np.isfinite(spawn_max_range) or abs(spawn_max_range) > max_range:
+        #         spawn_max_range = max_range
+        #     enemy = Enemy(
+        #         "assets/OBJ/Enemy.obj",
+        #         position=(
+        #             np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2),
+        #             -2,
+        #             np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2)
+        #         )
+        #     )
+        #     enemy.generate()
+        #     enemies.append(enemy)
+        #     last_spawn_time = current_time
 
         for enemy in enemies:
             enemy.move_to_target(player.position, dt)
@@ -182,8 +209,12 @@ while True:
 
         for _object in objects:
             if player.hitbox_cheat:
-                _object.hitbox.draw_hitbox((10.0, 10.0, 10.0))
-            _object.render()
+                if isinstance(_object, Hitbox):
+                    _object.draw_hitbox((1.0, 1.0, 1.0))
+                elif hasattr(_object, "hitbox") and _object.hitbox is not None:
+                    _object.hitbox.draw_hitbox((1.0, 1.0, 1.0))
+            if hasattr(_object, "render"):
+                _object.render()
 
         # Setup 2D projection für Overlay
         glMatrixMode(GL_PROJECTION)

@@ -3,6 +3,7 @@ import math
 import numpy as np
 
 from OBJ import OBJ
+from Hitbox import Hitbox
 
 
 class Enemy(OBJ):
@@ -18,7 +19,7 @@ class Enemy(OBJ):
     def move_to_target(self, target_pos, dt):
         direction_to_target = target_pos - self.position
         if np.any(direction_to_target):
-            direction_to_target /= np.linalg.norm(direction_to_target)  # Normalize the vector
+            direction_to_target /= np.linalg.norm(direction_to_target)
             self.position += direction_to_target * dt
 
     def rotate_to_target(self, target_pos):
@@ -26,15 +27,16 @@ class Enemy(OBJ):
         if np.any(direction_to_target):
             direction_to_target /= np.linalg.norm(direction_to_target)
             angle = -math.atan2(direction_to_target[2],
-                                direction_to_target[0])  # Berechnung des Winkels in der XZ-Ebene
-            self.rotation[1] = math.degrees(angle)  # Setze die Y-Rotation des Feindes
+                                direction_to_target[0])
+            self.rotation[1] = math.degrees(angle)
 
     def apply_gravity(self, objects, dt, player):
         if not player.flyhack:
-            if np.any([self.hitbox.check_collision(_object.hitbox, player) for _object in objects]):
-                self.position[1] += dt
-            else:
-                self.position[1] -= self.gravity * dt
+            if not any(self.position > (0,0,0)):
+                if np.any([self.hitbox.check_collision(_object if isinstance(_object, Hitbox) else getattr(_object, "hitbox", None),player)for _object in objects if isinstance(_object, Hitbox) or hasattr(_object, "hitbox")]):
+                    self.position[1] += dt
+                else:
+                    self.position[1] -= self.gravity * dt
 
     def kill_if_dead(self, enemies, player):
         if not self.hp:
