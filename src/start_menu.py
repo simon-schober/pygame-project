@@ -32,8 +32,8 @@ def change_mouse_texture(screen_width):
 
 def change_brightness(button, buttons, scale):
     scaled_button = pygame.transform.smoothscale(buttons[-1],
-                                                 (int(button.get_width() * (scale - 0.2)),
-                                                  int(button.get_height() * (scale - 0.2))))
+                                                 (int(button.get_width() * (scale)),
+                                                  int(button.get_height() * (scale))))
 
     return scaled_button
 
@@ -163,12 +163,12 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
                 was_clicked = True
                 which_button = i
                 # If the mouse is over the button, darken it and make it slightly bigger
-                darker_button = change_brightness(button, buttons, scale)
+                darker_button = change_brightness(button, buttons, 1.05)
 
                 scaled_button = pygame.transform.smoothscale(button, (
-                    int(button.get_width() * (scale - 0.2)),
-                    int(button.get_height() * (scale - 0.2))
-                ))
+                    int(button.get_width() * (1.05)),
+                    int(button.get_height() * (1.05)
+                        )))
 
                 screen.blit(scaled_button, ((screen_width - scaled_button.get_width()) // 2,
                                             int(screen_height * 0.6 + i * screen_height * 0.17) - int(scale * 380)))

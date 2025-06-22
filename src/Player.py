@@ -92,12 +92,12 @@ def render_2D_texture(surface, x, y, screen_width, screen_height):
 class Player:
     def __init__(self, position=None, rx=0, ry=0, move_speed=50, gravity=20,
                  direction=None, up=None, hitbox_size=None, hp=200.0, ammo=100,
-                 velocity=None, acceleration=None, friction=1.0, max_speed=500.0):
+                 velocity=None, acceleration=None, friction=0.95, max_speed=500.0):
         # Standardwerte für numpy-Arrays
         self.position = np.array([0.0, 10.0, 0.0]) if position is None else position
         self.direction = np.array([1.0, 0.0, 0.0]) if direction is None else direction
         self.up = np.array([0.0, 1.0, 0.0]) if up is None else up
-        self.hitbox_size = np.array([2.0, 4.0, 2.0]) if hitbox_size is None else hitbox_size
+        self.hitbox_size = np.array([5.0, 4.0, 5.0]) if hitbox_size is None else hitbox_size
         self.velocity = np.array([0.0, 0.0, 0.0]) if velocity is None else velocity
         self.acceleration = np.array([0.0, 0.0, 0.0]) if acceleration is None else acceleration
         self.rx = rx
@@ -128,13 +128,15 @@ class Player:
         self.reserve_ammo = self.ammo - self.mag_size
         self.mag_ammo_bevore = self.mag_ammo
         self.ammo_bevore = self.ammo
-        self.jump_strength = 1.0
+        self.jump_strength = 1.5
         self.gun_spin_angle = 0
         self.gun_spin_speed = 720
         self.gun_spin_current = 0
         self.on_ground = False
         self.mode = False
         self.end = False
+        self.decke_blockiert = False
+        self.kann_springen = True
 
     def compute_cam_direction(self, gun, dt=1 / 60):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
@@ -161,7 +163,7 @@ class Player:
         self.flyhack = self.mode
         self.healhack = self.mode
         self.infinity = self.mode
-        self.colider = not self.mode  # Kollisionen im Godmode deaktivieren
+        self.colider = not self.mode
         if self.mode:
             self.ammo_bevore = self.ammo
             self.mag_ammo_bevore = self.mag_ammo
@@ -239,8 +241,8 @@ class Player:
                     self.god_mode()
                     self.godmode_sequence = []
 
-    def handle_movement(self, dt):
-        """Verarbeitet die Bewegung des Spielers und die zugehörigen Sounds."""
+    def handle_movement(self, dt, hitboxes_map):
+        """Verarbeitet die Bewegung des Spielers und die zugehörigen Sounds. Blockiert Bewegung bei Kollision mit Map-Hitboxen."""
         keys = pygame.key.get_pressed()
 
         move = np.array([0.0, 0.0, 0.0])
@@ -252,10 +254,8 @@ class Player:
             move += self.right
         if keys[K_d]:
             move -= self.right
-        # Nur horizontale Bewegung erlauben (Y ignorieren)
         move[1] = 0
         is_moving = np.linalg.norm(move) > 0
-        # Sound nur abspielen, wenn man am Boden ist und sich bewegt
         if is_moving and self.on_ground:
             if not self.footstep_channel.get_busy():
                 self.footstep_channel.play(self.footstep_sound, loops=-1)
@@ -267,23 +267,64 @@ class Player:
         self.acceleration = move * self.move_speed
 
         self.velocity += self.acceleration * dt
-        # SPRINGEN MIT LEERTASTE
+        self.kann_springen = True
+        self.decke_blockiert = False
+        abstand = 0.1
+        for i in range(1, 6):
+            temp_position = self.position.copy()
+            temp_position[1] += abstand * i
+            temp_hitbox = Hitbox(temp_position, self.hitbox_size)
+            for hitbox in hitboxes_map:
+                if temp_hitbox.get_collision_vector(hitbox) is not None:
+                    self.kann_springen = False
+                    break
+            if not self.kann_springen and self.velocity[1] >= 0:
+                # Decke ist blockiert, wenn in irgendeinem Schritt eine Kollision erkannt wurde
+                self.decke_blockiert = True
+                break
+
+        if self.on_ground:
+            self.decke_blockiert = False
+            self.kann_springen = True
+
         if keys[K_SPACE] and self.on_ground:
-            self.velocity[1] = 25.0  # Sprungkraft, ggf. als Attribut setzen
-            self.on_ground = False
+            if self.kann_springen:
+                self.velocity[1] = max(self.velocity[1], 35) * self.jump_strength
+
+        # Wenn die Decke blockiert ist, Y-Velocity auf 0 setzen und Player etwas nach unten schieben
+        if self.decke_blockiert:
+            self.velocity[1] = -1
+            self.position[1] -= self.jump_strength * dt * 20  # Wert ggf. anpassen
         self.velocity *= self.friction
         velocity_norm = np.linalg.norm(self.velocity)
         if velocity_norm > self.max_speed:
             self.velocity = self.velocity / velocity_norm * self.max_speed
-        self.position[0] += self.velocity[0] * dt
-        self.position[2] += self.velocity[2] * dt
-        # self.position[1] bleibt unverändert
 
-    def apply_gravity(self, objects, dt):
-        """Wendet die Schwerkraft auf den Spieler an und überprüft die Bodenkontakt."""
+        # Neue Position berechnen und auf Kollision prüfen (x und z getrennt)
+        new_position = self.position.copy()
+        for axis in [0, 2]:  # 0 = x, 2 = z
+            temp_position = new_position.copy()
+            temp_position[axis] += self.velocity[axis] * dt
+            temp_hitbox = Hitbox(temp_position, self.hitbox_size)
+            temp_hitbox.position[1] += 1
+            collision = False
+            for hitbox in hitboxes_map:
+                if temp_hitbox.get_collision_vector(hitbox) is not None:
+                    collision = True
+                    break
+            if not collision:
+                temp_hitbox.position[1] -= 1
+                new_position[axis] = temp_position[axis]
+            else:
+                self.velocity[axis] = 0  # Stoppe Bewegung in diese Richtung
+        self.position[0] = new_position[0]
+        self.position[2] = new_position[2]
+
+    def apply_gravity(self, hitboxes, dt):
+        """Wendet die Schwerkraft auf den Spieler an und überprüft die Bodenkontakt. Gravity wird nicht angewendet, wenn die neue Position mit einer Hitbox kollidiert. hitboxes ist eine Liste von Hitboxen."""
         am_boden = False
-        for obj in objects:
-            if self.hitbox.check_collision(obj.hitbox, self):
+        for hitbox in hitboxes:
+            if self.hitbox.check_collision(hitbox, self):
                 am_boden = True
                 break
         if not self.flyhack:
@@ -292,36 +333,51 @@ class Player:
                     self.velocity[1] = 0
                 self.on_ground = True
             else:
-                self.velocity[1] -= self.gravity * dt
+                # Vor dem Anwenden der Gravity prüfen, ob die neue Position kollidiert
+                new_position = self.position.copy()
+                new_position[1] += (self.velocity[1] - self.gravity * dt) * dt
+                temp_hitbox = Hitbox(new_position, self.hitbox_size)
+                collision = False
+                for hitbox in hitboxes:
+                    if temp_hitbox.get_collision_vector(hitbox) is not None:
+                        collision = True
+                        break
+                if not collision:
+                    self.velocity[1] -= self.gravity * dt
                 self.on_ground = False
         self.position[1] += self.velocity[1] * dt
-        # Optional: Bodenhöhe (z.B. y=0) erzwingen
         if self.position[1] < 0:
             self.position[1] = 0
             self.velocity[1] = 0
             self.on_ground = True
 
     def check_collision(self, enemies, dt, pushback_multiplier=18):
-        """Überprüft Kollisionen mit Feinden und wendet ggf. Rückstoß an."""
-        if self.mode:  # Godmode: keine Kollisionen
+        """Überprüft Kollisionen mit Map und Feinden und wendet ggf. Rückstoß an."""
+        if self.mode:
             return False
+        # Dann Feind-Kollisionen prüfen
         for enemy in enemies:
-            collision_vector = self.hitbox.get_collision_vector(enemy.hitbox)
-            if collision_vector is not None:
-                collision_vector[
-                    1] = 0  # Y-Komponente ignorieren, damit der Spieler nicht nach oben/unten gedrückt wird
-                self.position -= collision_vector * pushback_multiplier * dt
-                if not self.healhack:
-                    self.hp -= enemy.damage
-                return True
+            if hasattr(enemy, "hitbox"):
+                collision_vector_enemy = self.hitbox.get_collision_vector(enemy.hitbox)
+                if collision_vector_enemy is not None:
+                    collision_vector_enemy[1] = 0
+                    self.position -= collision_vector_enemy * pushback_multiplier * dt
+                    if not self.healhack:
+                        self.hp -= enemy.damage
+                    return True
+            else:
+                collision_vector_enemy = self.hitbox.get_collision_vector(enemy)
+                if collision_vector_enemy is not None:
+                    collision_vector_enemy[1] = 0
+                    self.position -= collision_vector_enemy * pushback_multiplier * dt
+                    return True
         return False
 
     def update_positions(self, gun):
         self.hitbox.position = self.position
-        # Offset für klassische Ego-Shooter-Ansicht, weiter nach vorne
-        vor_offset = -2  # weiter nach vorne
-        rechts_offset = -1.5  # nach rechts
-        unten_offset = -0.7  # nach unten (negativ = nach unten)
+        vor_offset = -2
+        rechts_offset = -1.5
+        unten_offset = -0.7
         gun.position = [
             self.position[0] + self.direction[0] * vor_offset + self.right[0] * rechts_offset + self.up[
                 0] * unten_offset,
@@ -337,7 +393,7 @@ class Player:
             if not self.infinity:
                 self.mag_ammo -= 1
             shoot_sound = pygame.mixer.Sound('assets/Sounds/pistol-shot.mp3')
-            shoot_sound.set_volume(1.0)  # Lautstärke auf Maximum setzen
+            shoot_sound.set_volume(1.0)
             self.shoot_channel.play(shoot_sound)
             for enemy in enemies:
                 if enemy.hitbox.check_ray_collision(ray_origin, -self.direction):
@@ -361,7 +417,8 @@ class Player:
             life = life_font.render(f'Time you survived:', True,
                                     (132, 8, 0))
             life_time = life_font.render(f'{h:02}:{m:02}:{s:02}', True, (132, 8, 0))
-            render_2D_texture(life, screen_width // 2 - life.get_width() // 2, screen_height // 2 - 100, screen_width,
+            render_2D_texture(life, screen_width // 2 - ((life.get_width() // 2) * 2), screen_height // 2 - 100,
+                              screen_width,
                               screen_height)
             render_2D_texture(life_time, screen_width // 2 // 2, screen_height // 2,
                               screen_width,
