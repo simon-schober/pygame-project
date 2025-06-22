@@ -32,6 +32,10 @@ pygame.font.init()
 pygame.mixer.init()
 
 # Musik abspielen: DEMISE.wav im Hintergrund und in Dauerschleife
+pygame.mixer.music.load('assets/Sounds/DEMISE.wav')
+pygame.mixer.music.set_volume(0.1)
+pygame.mixer.music.play(-1)  # -1 bedeutet Endlosschleife
+
 # Initialize screen
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
 pygame.display.set_caption(Game_name)
@@ -181,21 +185,21 @@ while True:
             player.hp += healing_number
             last_time = current_time
 
-        # if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
-        #     max_range = 100
-        #     if not np.isfinite(spawn_max_range) or abs(spawn_max_range) > max_range:
-        #         spawn_max_range = max_range
-        #     enemy = Enemy(
-        #         "assets/OBJ/Enemy.obj",
-        #         position=(
-        #             np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2),
-        #             -2,
-        #             np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2)
-        #         )
-        #     )
-        #     enemy.generate()
-        #     enemies.append(enemy)
-        #     last_spawn_time = current_time
+        if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
+            max_range = 100
+            if not np.isfinite(spawn_max_range) or abs(spawn_max_range) > max_range:
+                spawn_max_range = max_range
+            enemy = Enemy(
+                "assets/OBJ/Enemy.obj",
+                position=(
+                    np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2),
+                    -2,
+                    np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2)
+                )
+            )
+            enemy.generate()
+            enemies.append(enemy)
+            last_spawn_time = current_time
 
         for enemy in enemies:
             enemy.move_to_target(player.position, dt)

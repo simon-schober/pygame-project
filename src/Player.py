@@ -433,5 +433,9 @@ class Player:
                 reload_sound = pygame.mixer.Sound('assets/Sounds/reload.mp3')
                 reload_sound.set_volume(0.3)
                 self.shoot_channel.play(reload_sound)
-            self.mag_ammo += nachgeladen
-            self.ammo -= nachgeladen
+                self.mag_ammo += nachgeladen
+                self.ammo -= nachgeladen
+            else:
+                empty_sound = pygame.mixer.Sound('assets/Sounds/rifle-clip-empty-98832.mp3')
+                empty_sound.set_volume(0.3)
+                self.shoot_channel.play(empty_sound)
