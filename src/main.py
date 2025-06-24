@@ -53,6 +53,8 @@ spawn_interval = 2000  # Time in milliseconds
 last_spawn_time = pygame.time.get_ticks()  # Point in time of last spawn
 last_time = pygame.time.get_ticks()
 
+last_shoot = pygame.time.get_ticks()
+
 heal_time = 5000  # How long it takes so the player generate a new life (milliseconds)
 healing_number = 1  # How much does the player heal after the healtime ended
 hp_max = 200  # how much Hp can the Player have
@@ -160,7 +162,7 @@ while True:
 
         dt = clock.tick(60) / 1000.0
 
-        player.handle_events(enemies, current_time)
+        last_shoot = player.handle_events(enemies, current_time, last_shoot)
         if player.flyhack:
             player.handle_flying_movement(dt)
         else:
@@ -183,12 +185,12 @@ while True:
         if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
             enemy = Enemy(
                 "assets/OBJ/Enemy.obj",
-                position=(
+                position=np.array((
                     np.random.uniform(hitboxes_map[2].position[0], hitboxes_map[3].position[0]),
                     0,
                     np.random.uniform(hitboxes_map[0].position[2], hitboxes_map[1].position[2]),
                 )
-            )
+            ))
             enemy.generate()
             enemies.append(enemy)
             last_spawn_time = current_time
