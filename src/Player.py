@@ -138,7 +138,7 @@ class Player:
         self.decke_blockiert = False
         self.kann_springen = True
 
-    def compute_cam_direction(self, gun, dt=1 / 60):
+    def compute_cam_direction(self, gun):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
         yaw_rad = np.radians(self.rx)
         pitch_rad = np.radians(self.ry)
@@ -154,8 +154,6 @@ class Player:
         self.right = self.right / np.linalg.norm(self.right)
 
         gun.rotation = [0, np.degrees(yaw_rad), 0]
-        if hasattr(self, 'reload_gun_rotation'):
-            del self.reload_gun_rotation
         gun.render()
 
     def god_mode(self):
@@ -186,10 +184,6 @@ class Player:
         """Verarbeitet die Flugbewegung des Spielers."""
         keys = pygame.key.get_pressed()
 
-        if keys[K_LCTRL]:
-            self.move_speed = 18
-        else:
-            self.move_speed = 10
         # Movement
         if keys[K_s]:
             self.position += self.direction * self.move_speed * dt
@@ -346,7 +340,7 @@ class Player:
                     self.velocity[1] -= self.gravity * dt
                 self.on_ground = False
         self.position[1] += self.velocity[1] * dt
-        if self.position[1] < 0:
+        if self.position[1] < 0 and not self.flyhack:
             self.position[1] = 0
             self.velocity[1] = 0
             self.on_ground = True
@@ -362,8 +356,6 @@ class Player:
                 if collision_vector_enemy is not None:
                     collision_vector_enemy[1] = 0
                     self.position -= collision_vector_enemy * pushback_multiplier * dt
-                    if not self.healhack:
-                        self.hp -= enemy.damage
                     return True
             else:
                 collision_vector_enemy = self.hitbox.get_collision_vector(enemy)

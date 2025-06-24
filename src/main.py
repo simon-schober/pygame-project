@@ -144,7 +144,7 @@ while True:
                 Hitbox(position=np.array([-100.0, 10.0756, 195.0]), size=np.array([175.90882, 60.6338, 23.687])),
                 Hitbox(position=np.array([-141.76, 3.2, 110.510933]), size=np.array([21.5, 15.5, 21.5])),
                 Hitbox(position=np.array([-74.1163, 3.2, 110.510933]), size=np.array([21.5, 15.5, 21.5])),
-                Hitbox(position=np.array([-108.50993, 9.7, 110.510933]), size=np.array([50.5, 1.0, 8.5])),
+                Hitbox(position=np.array([-108.50993, 10.7, 110.510933]), size=np.array([50.5, 1.0, 8.5])),
                 Hitbox(position=np.array([-109.50993, 1.5, 53.5]), size=np.array([24.0, 9.55143, 2.8])),
                 Hitbox(position=np.array([-109.50993, 1.5, 164.5]), size=np.array([24.0, 9.55143, 2.8]))
             ]
@@ -155,12 +155,6 @@ while True:
                 _object.generate()
             for hitbox_map in hitboxes_map:
                 objects.append(hitbox_map)
-
-            vertices = np.array(untitled_obj.vertices)
-            min_x = vertices[:, 0].min()
-            max_x = vertices[:, 0].max()
-            breite = (max_x - min_x) * untitled_obj.scale[0] - 10.0
-            spawn_max_range = breite
 
             pygame.mouse.set_visible(False)
 
@@ -179,22 +173,20 @@ while True:
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        player.check_collision(enemies, dt, 18)
+        player.check_collision(hitboxes_map, dt, 18)
+        player.check_collision(enemies, dt, 17)
 
         if current_time - last_time >= heal_time and player.hp + healing_number <= hp_max:
             player.hp += healing_number
             last_time = current_time
 
         if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
-            max_range = 100
-            if not np.isfinite(spawn_max_range) or abs(spawn_max_range) > max_range:
-                spawn_max_range = max_range
             enemy = Enemy(
                 "assets/OBJ/Enemy.obj",
                 position=(
-                    np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2),
-                    -2,
-                    np.random.uniform(-spawn_max_range / 2, spawn_max_range / 2)
+                    np.random.uniform(hitboxes_map[2].position[0], hitboxes_map[3].position[0]),
+                    0,
+                    np.random.uniform(hitboxes_map[0].position[2], hitboxes_map[1].position[2]),
                 )
             )
             enemy.generate()
@@ -202,7 +194,7 @@ while True:
             last_spawn_time = current_time
 
         for enemy in enemies:
-            enemy.move_to_target(player.position, dt)
+            enemy.move_to_target(player, hitboxes_map, dt)
             enemy.rotate_to_target(player.position)
             enemy.apply_gravity(objects, dt, player)
             enemy.kill_if_dead(enemies, player)
@@ -235,5 +227,5 @@ while True:
         glPopMatrix()
 
         render_text_and_image(screen_width, screen_height)
-        if not player.hp <= 0:
+        if not player.hp < 1:
             pygame.display.flip()
