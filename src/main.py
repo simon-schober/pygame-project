@@ -116,6 +116,8 @@ def render_text_and_image(screen_width, screen_height):
     render_2D_texture(mag_surface, screen_width - 300, 210, screen_width, screen_height)
 
 
+last_shot = 0
+
 # Main loop
 pygame.mouse.set_visible(False)
 while True:
@@ -160,7 +162,7 @@ while True:
 
         dt = clock.tick(60) / 1000.0
 
-        player.handle_events(enemies, current_time)
+        last_shot = player.handle_events(enemies, current_time, last_shot)
         if player.flyhack:
             player.handle_flying_movement(dt)
         else:

@@ -137,6 +137,7 @@ class Player:
         self.end = False
         self.decke_blockiert = False
         self.kann_springen = True
+        self.weapon_type = "instant"
 
     def compute_cam_direction(self, gun):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
@@ -198,7 +199,7 @@ class Player:
         if keys[K_LSHIFT]:
             self.position -= self.up * self.move_speed * dt
 
-    def handle_events(self, enemies, dt):
+    def handle_events(self, enemies, dt, last_shoot):
         """Verarbeitet die Eingabeereignisse für den Spieler."""
         for e in pygame.event.get():
             if e.type == QUIT:
@@ -207,17 +208,10 @@ class Player:
                 sys.exit()
             elif e.type == KEYDOWN and e.key == K_r:
                 self.reload()
-            elif e.type == MOUSEMOTION:
+            if e.type == MOUSEMOTION:
                 self.dx, self.dy = e.rel
                 self.rx -= self.dx
                 self.ry = 0.000000000001
-            elif e.type == MOUSEBUTTONDOWN and e.button == 1:
-                if self.mag_ammo == "∞" or self.mag_ammo > 0:
-                    self.raycast_shoot(enemies)
-                else:
-                    empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEmptySound.wav')
-                    empty_sound.set_volume(1.0)
-                    self.shoot_channel.play(empty_sound)
             if e.type == KEYDOWN:
                 if dt - self.last_input_time > 10000:
                     self.godmode_sequence = []
@@ -228,12 +222,36 @@ class Player:
                 # Trim to last 4 keys
                 self.godmode_sequence = self.godmode_sequence[-4:]
                 if self.godmode_sequence == self.godmode_code:
-                    if self.mode:
-                        self.mode = False
-                    else:
-                        self.mode = True
+                    self.mode = not self.mode
                     self.god_mode()
                     self.godmode_sequence = []
+        now = pygame.time.get_ticks()
+        if self.weapon_type == "cooldown":
+            try:
+                if e.type == MOUSEBUTTONDOWN and e.button == 1 and now - last_shoot > 500:
+                    if (self.mag_ammo == "∞" or self.mag_ammo > 0):
+                        self.raycast_shoot(enemies)
+                        last_shoot = now
+                    else:
+                        empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEmptySound')
+                        empty_sound.set_volume(1.0)
+                        self.shoot_channel.play(empty_sound)
+            except:
+                print("Fuck")
+        if self.weapon_type == "instant":
+            mouse_buttons = pygame.mouse.get_pressed()
+            if mouse_buttons[0]:
+                now = pygame.time.get_ticks()
+                if (self.mag_ammo == "∞" or self.mag_ammo > 0) and (now - last_shoot > 150):
+                    self.raycast_shoot(enemies)
+                    last_shoot = now
+                elif (now - last_shoot > 250):
+                    empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEmptySound.wav')
+                    empty_sound.set_volume(0.2)
+                    self.shoot_channel.play(empty_sound)
+                    last_shoot = now
+
+        return last_shoot
 
     def handle_movement(self, dt, hitboxes_map):
         """Verarbeitet die Bewegung des Spielers und die zugehörigen Sounds. Blockiert Bewegung bei Kollision mit Map-Hitboxen."""
@@ -429,5 +447,5 @@ class Player:
                 self.ammo -= nachgeladen
             else:
                 empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEntirelyEmptySound.wav')
-                empty_sound.set_volume(1.0)
+                empty_sound.set_volume(0.7)
                 self.shoot_channel.play(empty_sound)
