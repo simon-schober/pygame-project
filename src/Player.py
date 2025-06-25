@@ -422,7 +422,7 @@ class Player:
             self.end = True
             self.life_time = copy(pygame.time.get_ticks()) - start_time
         if self.end:
-            life_font = pygame.font.Font('assets/StartMenu/Font/BLKCHCRY.TTF',
+            life_font = pygame.font.Font('assets/StartMenu/BLKCHCRY.TTF',
                                          int((150 // (screen_height * 0.00078125)) / 2))
             s = (self.life_time // 1000) % 60
             m = (s // 60) % 60
@@ -437,6 +437,8 @@ class Player:
                               screen_width,
                               screen_height)
             pygame.display.flip()
+            time.wait(5000)
+        return self.end
 
     def reload(self):
         if not self.mag_ammo == "∞":

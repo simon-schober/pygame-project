@@ -31,16 +31,6 @@ pygame.init()
 pygame.font.init()
 pygame.mixer.init()
 
-# Musik abspielen: DEMISE.wav im Hintergrund und in Dauerschleife
-pygame.mixer.music.load('assets/Sounds/DEMISE.wav')
-pygame.mixer.music.set_volume(0.1)
-pygame.mixer.music.play(-1)  # -1 bedeutet Endlosschleife
-
-# Initialize screen
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
-pygame.display.set_caption(Game_name)
-screen_width, screen_height = screen.get_size()
-start_menu_scale = (1.03 / 900) * screen_height
 # Game clock
 clock = pygame.time.Clock()
 
@@ -118,12 +108,18 @@ def render_text_and_image(screen_width, screen_height):
 
 
 last_shot = 0
-
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
+screen_width, screen_height = screen.get_size()
+start_menu_scale = (1.03 / 900) * screen_height
 # Main loop
 pygame.mouse.set_visible(False)
 while True:
     current_time = pygame.time.get_ticks()
     if current_state == "menu":
+        pygame.mixer.music.load('assets/Sounds/DEMISE.wav')
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(-1)  # -1 bedeutet Endlosschleife
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
         current_state = make_start_menu(screen, Game_name, option_lines, credit_lines, start_menu_scale,
                                         current_state_menu)
     elif current_state == "game":
@@ -133,11 +129,12 @@ while True:
             init_graphics((screen.get_width(), screen.get_height()))
             opengl_initialized = True
 
-            enemies = [Enemy("assets/OBJ/Enemy.obj")]
-            untitled_obj = OBJ("assets/OBJ/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
+            enemies = [Enemy("assets/OBJ/Enemy/Enemy.obj")]
+            untitled_obj = OBJ("assets/OBJ/Map/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
             untitled_obj.generate()
             objects = [untitled_obj,
-                       OBJ("assets/OBJ/shotgun.obj", scale=[0.25, 0.25, 0.25], hitbox_size=[0.0, 0.0, 0.0],
+                       OBJ("assets/OBJ/Weapon/Shotgun/shotgun.obj", scale=[0.25, 0.25, 0.25],
+                           hitbox_size=[0.0, 0.0, 0.0],
                            rotation=[90.0, 0.0, 0.0])]
             player = Player(position=np.array([-109.50993, 0.0, 109.5]), hp=hp_max, ammo=ammo_max)
             hitboxes_map = [
@@ -171,7 +168,10 @@ while True:
         player.compute_cam_direction(objects[1])
         player.apply_gravity(hitboxes_map, dt)
         player.apply_transformations()
-        player.kill_if_dead(screen_width, screen_height, start_time)
+        if player.kill_if_dead(screen_width, screen_height, start_time):
+            current_state = "menu"
+            opengl_initialized = False
+            continue
         player.update_positions(objects[1])
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -185,7 +185,7 @@ while True:
 
         if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
             enemy = Enemy(
-                "assets/OBJ/Enemy.obj",
+                "assets/OBJ/Enemy/Enemy.obj",
                 position=(
                     np.random.uniform(hitboxes_map[2].position[0], hitboxes_map[3].position[0]),
                     0,
