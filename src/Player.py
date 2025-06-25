@@ -123,7 +123,7 @@ class Player:
         self.footstep_channel = pygame.mixer.Channel(1)
         self.shoot_channel = pygame.mixer.Channel(2)
         self.hitbox = Hitbox(self.position, self.hitbox_size)
-        self.mag_size = 12
+        self.mag_size = 100
         self.mag_ammo = self.mag_size
         self.reserve_ammo = self.ammo - self.mag_size
         self.mag_ammo_bevore = self.mag_ammo
@@ -137,6 +137,7 @@ class Player:
         self.end = False
         self.decke_blockiert = False
         self.kann_springen = True
+        self.weappon_style = "cooldown"
 
     def compute_cam_direction(self, gun):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
@@ -212,15 +213,15 @@ class Player:
                 self.rx -= self.dx
                 self.ry = 0.000000000001
             now = pygame.time.get_ticks()
-            if e.type == MOUSEBUTTONDOWN and e.button == 1 and now - last_shoot > 500:
-                if (self.mag_ammo == "∞" or self.mag_ammo > 0):
-                    self.raycast_shoot(enemies)
-                    last_shoot = now
-                else:
-                    empty_sound = pygame.mixer.Sound('assets/Sounds/empty-gun-shot-6209.mp3')
-                    empty_sound.set_volume(0.2)
-                    self.shoot_channel.play(empty_sound)
-
+            if self.weappon_style == "cooldown":
+                if e.type == MOUSEBUTTONDOWN and e.button == 1 and now - last_shoot > 500:
+                    if (self.mag_ammo == "∞" or self.mag_ammo > 0):
+                        self.raycast_shoot(enemies)
+                        last_shoot = now
+                    else:
+                        empty_sound = pygame.mixer.Sound('assets/Sounds/empty-gun-shot-6209.mp3')
+                        empty_sound.set_volume(0.2)
+                        self.shoot_channel.play(empty_sound)
             if e.type == KEYDOWN:
                 if dt - self.last_input_time > 10000:
                     self.godmode_sequence = []
@@ -231,12 +232,22 @@ class Player:
                 # Trim to last 4 keys
                 self.godmode_sequence = self.godmode_sequence[-4:]
                 if self.godmode_sequence == self.godmode_code:
-                    if self.mode:
-                        self.mode = False
-                    else:
-                        self.mode = True
+                    self.mode = not self.mode
                     self.god_mode()
                     self.godmode_sequence = []
+        if self.weappon_style == "instant":
+            mouse_buttons = pygame.mouse.get_pressed()
+            if mouse_buttons[0]:
+                now = pygame.time.get_ticks()
+                if (self.mag_ammo == "∞" or self.mag_ammo > 0) and (now - last_shoot > 150):
+                    self.raycast_shoot(enemies)
+                    last_shoot = now
+                elif (now - last_shoot > 250):
+                    empty_sound = pygame.mixer.Sound('assets/Sounds/empty-gun-shot-6209.mp3')
+                    empty_sound.set_volume(0.2)
+                    self.shoot_channel.play(empty_sound)
+                    last_shoot = now
+
         return last_shoot
 
     def handle_movement(self, dt, hitboxes_map):
