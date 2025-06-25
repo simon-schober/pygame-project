@@ -118,8 +118,8 @@ class Player:
         self.godmode_sequence = []
         self.last_input_time = 0
         self.godmode_code = ['up', 'left', 'down', 'right']
-        self.footstep_sound = pygame.mixer.Sound('assets/Sounds/concrete-footsteps-6752.mp3')
-        self.footstep_sound.set_volume(0.2)
+        self.footstep_sound = pygame.mixer.Sound('assets/Sounds/Footsteps.wav')
+        self.footstep_sound.set_volume(10)
         self.footstep_channel = pygame.mixer.Channel(1)
         self.shoot_channel = pygame.mixer.Channel(2)
         self.hitbox = Hitbox(self.position, self.hitbox_size)
@@ -215,8 +215,8 @@ class Player:
                 if self.mag_ammo == "∞" or self.mag_ammo > 0:
                     self.raycast_shoot(enemies)
                 else:
-                    empty_sound = pygame.mixer.Sound('assets/Sounds/empty-gun-shot-6209.mp3')
-                    empty_sound.set_volume(0.2)
+                    empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEmptySound.wav')
+                    empty_sound.set_volume(1.0)
                     self.shoot_channel.play(empty_sound)
             if e.type == KEYDOWN:
                 if dt - self.last_input_time > 10000:
@@ -384,7 +384,7 @@ class Player:
         if self.mag_ammo == "∞" or self.mag_ammo > 0:
             if not self.infinity:
                 self.mag_ammo -= 1
-            shoot_sound = pygame.mixer.Sound('assets/Sounds/pistol-shot.mp3')
+            shoot_sound = pygame.mixer.Sound('assets/Sounds/GunShot.wav')
             shoot_sound.set_volume(1.0)
             self.shoot_channel.play(shoot_sound)
             for enemy in enemies:
@@ -422,12 +422,12 @@ class Player:
             nachzuladen = self.mag_size - self.mag_ammo
             nachgeladen = min(nachzuladen, self.ammo)
             if nachgeladen > 0:
-                reload_sound = pygame.mixer.Sound('assets/Sounds/reload.mp3')
-                reload_sound.set_volume(0.3)
+                reload_sound = pygame.mixer.Sound('assets/Sounds/ReloadSound.wav')
+                reload_sound.set_volume(1.0)
                 self.shoot_channel.play(reload_sound)
                 self.mag_ammo += nachgeladen
                 self.ammo -= nachgeladen
             else:
-                empty_sound = pygame.mixer.Sound('assets/Sounds/rifle-clip-empty-98832.mp3')
-                empty_sound.set_volume(0.3)
+                empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEntirelyEmptySound.wav')
+                empty_sound.set_volume(1.0)
                 self.shoot_channel.play(empty_sound)

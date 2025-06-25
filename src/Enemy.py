@@ -53,7 +53,10 @@ class Enemy(OBJ):
                     _object in objects if isinstance(_object, Hitbox) or hasattr(_object, "hitbox")]):
                     self.position[1] += dt
                 else:
-                    self.position[1] -= self.gravity * dt
+                    try:
+                        self.position[1] -= self.gravity * dt
+                    except:
+                        print("Fuck")
 
     def kill_if_dead(self, enemies, player):
         if not self.hp:
