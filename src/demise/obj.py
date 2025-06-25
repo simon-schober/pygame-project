@@ -50,7 +50,7 @@ class OBJ:
 
     def __init__(self, filename, position=np.zeros(3), rotation=np.zeros(3), scale=np.ones(3),
                  hitbox_size=np.array([1.0, 1.0, 1.0]), swapyz=False):
-        """Loads a Wavefront OBJ file. """
+        """Loads a Wavefront Model file. """
         self.vertices = []
         self.normals = []
         self.texcoords = []

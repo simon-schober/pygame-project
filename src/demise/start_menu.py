@@ -9,12 +9,14 @@ def scale_button(button, screen_width):
 
 
 def load_buttons(screen_width):
-    # Load all the button pictures, and scale it
-    play = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\play.png').convert_alpha(), screen_width)
-    option = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\optionen.png').convert_alpha(), screen_width)
-    credits = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\credits.png').convert_alpha(), screen_width)
-    quit = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\quit.png').convert_alpha(), screen_width)
-    dark_button = scale_button(pygame.image.load(r'assets\StartMenu\Buttons\Dark_Button.png').convert_alpha(),
+    # Load all the button pictures, und skaliere sie
+    play = scale_button(pygame.image.load('assets/2DTexture/StartMenu/Buttons/play.png').convert_alpha(), screen_width)
+    option = scale_button(pygame.image.load('assets/2DTexture/StartMenu/Buttons/optionen.png').convert_alpha(),
+                          screen_width)
+    credits = scale_button(pygame.image.load('assets/2DTexture/StartMenu/Buttons/credits.png').convert_alpha(),
+                           screen_width)
+    quit = scale_button(pygame.image.load('assets/2DTexture/StartMenu/Buttons/quit.png').convert_alpha(), screen_width)
+    dark_button = scale_button(pygame.image.load('assets/2DTexture/StartMenu/Buttons/Dark_Button.png').convert_alpha(),
                                screen_width)
     return [play, option, credits, quit, dark_button]  # dark_button is last!!!
 
@@ -26,7 +28,7 @@ def scale_mouse_texture(mouse_texture, screen_width):
 
 
 def change_mouse_texture(screen_width):
-    return scale_mouse_texture(pygame.image.load(r'assets\StartMenu\MouseSkull.png').convert_alpha(),
+    return scale_mouse_texture(pygame.image.load(r'assets/2DTexture/StartMenu/MouseSkull.png').convert_alpha(),
                                screen_width)
 
 
@@ -40,7 +42,7 @@ def change_brightness(button, buttons, scale):
 
 def load_and_render_text(Game_name, screen_width, screen_height):
     # Load a font file, set size based on screen height
-    font = pygame.font.Font(r"assets\StartMenu\BLKCHCRY.TTF", int((140 * ((1.03 / 900) * screen_height))))
+    font = pygame.font.Font("assets/Font/BLKCHCRY.TTF", int((140 * ((1.03 / 900) * screen_height))))
     # Make the font underlined, bold, and italic
     font.set_underline(True)
     font.set_bold(True)
@@ -49,7 +51,7 @@ def load_and_render_text(Game_name, screen_width, screen_height):
     # Render the game name text in white
     text_surface = font.render(Game_name, True, (255, 255, 255))
     # Load a rusty metal texture picture and scale it to the size of the text_surface
-    texture = pygame.image.load(r"assets\StartMenu\RustyMetal.png").convert()
+    texture = pygame.image.load("assets/2DTexture/StartMenu/RustyMetal.png").convert()
     texture = pygame.transform.scale(texture, text_surface.get_size())
 
     # Create a new transparent surface the same size as the text
@@ -66,7 +68,7 @@ def option_menu(screen, screen_width, screen_height, option_lines):
     # Use the default pygame font, scale the size
     font = pygame.font.Font(None, int((60 // (screen_height * 0.00078125)) / 2))
     # Load a background picture for the menu and scale to the creen size
-    menu_bg_picture = pygame.image.load(r"assets\StartMenu\Stone_Texture\Black_Stone.jpg")
+    menu_bg_picture = pygame.image.load(r"../assets\StartMenu\Stone_Texture\Black_Stone.jpg")
     menu_bg_picture = pygame.transform.scale(menu_bg_picture, (screen_width, screen_height))
 
     running_options = True
@@ -100,7 +102,7 @@ def credits_menu(screen, screen_width, screen_height, credits_lines):
     font_bold_underline.set_underline(True)
 
     # Load and scale the same background picture as options menu
-    menu_bg_picture = pygame.image.load(r"assets\StartMenu\Stone_Texture\Black_Stone.jpg")
+    menu_bg_picture = pygame.image.load(r"../assets\StartMenu\Stone_Texture\Black_Stone.jpg")
     menu_bg_picture = pygame.transform.scale(menu_bg_picture, (screen_width, screen_height))
 
     running_credits = True
@@ -134,7 +136,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
     # Makes a new mouse texture
     mouse_texture = change_mouse_texture(screen_width)
     # Load and scale the background image for the start menu
-    start_bg_picture = pygame.image.load(r"assets\StartMenu\StartMenuBackground.jpeg")
+    start_bg_picture = pygame.image.load("assets/2DTexture/StartMenu/StartMenuBackground.jpeg")
     start_bg_picture = pygame.transform.scale(start_bg_picture, (screen_width, screen_height))
 
     # Load buttons and the dark overlay

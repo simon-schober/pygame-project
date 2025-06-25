@@ -236,7 +236,7 @@ class Player:
                         self.raycast_shoot(enemies)
                         last_shoot = now
                     else:
-                        empty_sound = pygame.mixer.Sound('assets/Sound/WeaponEmptySound.wav')
+                        empty_sound = pygame.mixer.Sound('../../assets/Sound/WeaponEmptySound.wav')
                         empty_sound.set_volume(1.0)
                         self.shoot_channel.play(empty_sound)
             except:
@@ -422,7 +422,7 @@ class Player:
             self.end = True
             self.life_time = copy(pygame.time.get_ticks()) - start_time
         if self.end:
-            life_font = pygame.font.Font('assets/StartMenu/BLKCHCRY.TTF',
+            life_font = pygame.font.Font('assets/Font/BLKCHCRY.TTF',
                                          int((150 // (screen_height * 0.00078125)) / 2))
             s = (self.life_time // 1000) % 60
             m = (s // 60) % 60
@@ -453,4 +453,4 @@ class Player:
             else:
                 empty_sound = pygame.mixer.Sound('assets/Sound/WeaponEntirelyEmptySound.wav')
                 empty_sound.set_volume(1.0)
-                self.shoot_channel.play(empty_sound)
+                self.shoot_channel.p

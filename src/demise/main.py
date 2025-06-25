@@ -50,14 +50,14 @@ ammo_max = 100
 max_enemies = 1000
 
 # Create font for the HP bar
-hp_font = pygame.font.Font("assets/StartMenu/BLKCHCRY.TTF", 145)
+hp_font = pygame.font.Font("assets/Font/BLKCHCRY.TTF", 145)
 
 
 def render_text_and_image(screen_width, screen_height):
     start_menu_scale = 1.003 / 900 * screen_height
 
     # Load and scale HP bar texture
-    hp_bar_field = pygame.image.load('assets/Game/HpBarTexture.png').convert_alpha()
+    hp_bar_field = pygame.image.load('assets/2DTexture/Game/HpBarTexture.png').convert_alpha()
     hp_bar_field = pygame.transform.smoothscale(hp_bar_field, (int(screen_width * (start_menu_scale - 0.94)),
                                                                int(screen_width * (
                                                                        start_menu_scale - 0.94) * hp_bar_field.get_height() / hp_bar_field.get_width())))
@@ -75,13 +75,13 @@ def render_text_and_image(screen_width, screen_height):
                       , 100, screen_width, screen_height)
 
     # Bullet image
-    bullet_pic = pygame.image.load("assets/Game/AmmoRifle.png").convert_alpha()
+    bullet_pic = pygame.image.load("assets/2DTexture/Game/AmmoRifle.png").convert_alpha()
     bullet_width = int(screen_width * 0.1)
     bullet_height = int(bullet_pic.get_height() * bullet_width / bullet_pic.get_width())
     bullet_pic = pygame.transform.scale(bullet_pic, (bullet_width, bullet_height))
     render_2D_texture(bullet_pic, screen_width - 300, -10, screen_width, screen_height)
 
-    crosshair = pygame.image.load('assets/Game/Crosshair.png').convert_alpha()
+    crosshair = pygame.image.load('assets/2DTexture/Game/Crosshair.png').convert_alpha()
     crosshair_size = int(screen_width * 0.02)
     crosshair = pygame.transform.smoothscale(crosshair, (crosshair_size, crosshair_size))
     render_2D_texture(crosshair, (screen_width - crosshair.get_width()) // 2,
@@ -91,8 +91,8 @@ def render_text_and_image(screen_width, screen_height):
     hp_font_size = int((175 // (screen_height * 0.00078125)) / 2)
     bullet_font_size = int((100 // (screen_height * 0.00078125)) / 2)
 
-    hp_font = pygame.font.Font('assets/StartMenu/BLKCHCRY.TTF', hp_font_size)
-    bullet_font = pygame.font.Font('assets/StartMenu/BLKCHCRY.TTF', bullet_font_size)
+    hp_font = pygame.font.Font('assets/Font/BLKCHCRY.TTF', hp_font_size)
+    bullet_font = pygame.font.Font('assets/Font/BLKCHCRY.TTF', bullet_font_size)
 
     # HP text
     text_surface = hp_font.render(f"{int(player.hp)}", True, (160, 160, 160))
@@ -129,11 +129,11 @@ while True:
             init_graphics((screen.get_width(), screen.get_height()))
             opengl_initialized = True
 
-            enemies = [Enemy("assets/OBJ/Enemy/Enemy.obj")]
-            untitled_obj = OBJ("assets/OBJ/Map/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
+            enemies = [Enemy("assets/Model/Enemy/Enemy.obj")]
+            untitled_obj = OBJ("assets/Model/Map/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
             untitled_obj.generate()
             objects = [untitled_obj,
-                       OBJ("assets/OBJ/Weapon/Shotgun/Shotgun.obj", scale=[0.25, 0.25, 0.25],
+                       OBJ("assets/Model/Weapon/Shotgun/Shotgun.obj", scale=[0.25, 0.25, 0.25],
                            hitbox_size=[0.0, 0.0, 0.0],
                            rotation=[90.0, 0.0, 0.0])]
             player = Player(position=np.array([-109.50993, 0.0, 109.5]), hp=hp_max, ammo=ammo_max)
@@ -185,7 +185,7 @@ while True:
 
         if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
             enemy = Enemy(
-                "assets/OBJ/Enemy/Enemy.obj",
+                "assets/Model/Enemy/Enemy.obj",
                 position=(
                     np.random.uniform(hitboxes_map[2].position[0], hitboxes_map[3].position[0]),
                     0,

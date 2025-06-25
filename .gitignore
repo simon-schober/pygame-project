@@ -255,4 +255,4 @@ http-client.private.env.json
 # PyPI configuration file
 .pypirc
 
-src/assets/
+assets/
