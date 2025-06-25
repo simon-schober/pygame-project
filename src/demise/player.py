@@ -453,4 +453,4 @@ class Player:
             else:
                 empty_sound = pygame.mixer.Sound('assets/Sound/WeaponEntirelyEmptySound.wav')
                 empty_sound.set_volume(1.0)
-                self.shoot_channel.p
+                self.shoot_channel.play(empty_sound)
