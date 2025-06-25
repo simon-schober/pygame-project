@@ -26,7 +26,7 @@ def scale_mouse_texture(mouse_texture, screen_width):
 
 
 def change_mouse_texture(screen_width):
-    return scale_mouse_texture(pygame.image.load(r'assets\StartMenu\Mouse_skull.png').convert_alpha(),
+    return scale_mouse_texture(pygame.image.load(r'assets\StartMenu\MouseSkull.png').convert_alpha(),
                                screen_width)
 
 
@@ -49,7 +49,7 @@ def load_and_render_text(Game_name, screen_width, screen_height):
     # Render the game name text in white
     text_surface = font.render(Game_name, True, (255, 255, 255))
     # Load a rusty metal texture picture and scale it to the size of the text_surface
-    texture = pygame.image.load(r"assets\StartMenu\rusty_metal_04_diff_4k.png").convert()
+    texture = pygame.image.load(r"assets\StartMenu\RustyMetal.png").convert()
     texture = pygame.transform.scale(texture, text_surface.get_size())
 
     # Create a new transparent surface the same size as the text
@@ -134,7 +134,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
     # Makes a new mouse texture
     mouse_texture = change_mouse_texture(screen_width)
     # Load and scale the background image for the start menu
-    start_bg_picture = pygame.image.load(r"assets\StartMenu\thumb_Doom_1993.jpeg")
+    start_bg_picture = pygame.image.load(r"assets\StartMenu\StartMenuBackground.jpeg")
     start_bg_picture = pygame.transform.scale(start_bg_picture, (screen_width, screen_height))
 
     # Load buttons and the dark overlay

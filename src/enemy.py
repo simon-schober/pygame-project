@@ -2,8 +2,8 @@ import math
 
 import numpy as np
 
-from Hitbox import Hitbox
-from OBJ import OBJ
+from hitbox import Hitbox
+from obj import OBJ
 
 
 class Enemy(OBJ):

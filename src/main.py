@@ -1,7 +1,7 @@
-from Enemy import *
-from OBJ import *
-from Player import *
+from enemy import *
 from graphics import init_graphics
+from obj import *
+from player import *
 from start_menu import make_start_menu
 
 # Menu variables
@@ -57,7 +57,7 @@ def render_text_and_image(screen_width, screen_height):
     start_menu_scale = 1.003 / 900 * screen_height
 
     # Load and scale HP bar texture
-    hp_bar_field = pygame.image.load('assets/Game/Hp_bar_texture.png').convert_alpha()
+    hp_bar_field = pygame.image.load('assets/Game/HpBarTexture.png').convert_alpha()
     hp_bar_field = pygame.transform.smoothscale(hp_bar_field, (int(screen_width * (start_menu_scale - 0.94)),
                                                                int(screen_width * (
                                                                        start_menu_scale - 0.94) * hp_bar_field.get_height() / hp_bar_field.get_width())))
@@ -75,13 +75,13 @@ def render_text_and_image(screen_width, screen_height):
                       , 100, screen_width, screen_height)
 
     # Bullet image
-    bullet_pic = pygame.image.load("assets/Game/ammo-rifle.png").convert_alpha()
+    bullet_pic = pygame.image.load("assets/Game/AmmoRifle.png").convert_alpha()
     bullet_width = int(screen_width * 0.1)
     bullet_height = int(bullet_pic.get_height() * bullet_width / bullet_pic.get_width())
     bullet_pic = pygame.transform.scale(bullet_pic, (bullet_width, bullet_height))
     render_2D_texture(bullet_pic, screen_width - 300, -10, screen_width, screen_height)
 
-    crosshair = pygame.image.load('assets/Game/crosshair.png').convert_alpha()
+    crosshair = pygame.image.load('assets/Game/Crosshair.png').convert_alpha()
     crosshair_size = int(screen_width * 0.02)
     crosshair = pygame.transform.smoothscale(crosshair, (crosshair_size, crosshair_size))
     render_2D_texture(crosshair, (screen_width - crosshair.get_width()) // 2,
@@ -116,7 +116,7 @@ pygame.mouse.set_visible(False)
 while True:
     current_time = pygame.time.get_ticks()
     if current_state == "menu":
-        pygame.mixer.music.load('assets/Sounds/DEMISE.wav')
+        pygame.mixer.music.load('assets/Sound/DEMISE.wav')
         pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play(-1)  # -1 bedeutet Endlosschleife
         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.DOUBLEBUF)
@@ -133,7 +133,7 @@ while True:
             untitled_obj = OBJ("assets/OBJ/Map/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
             untitled_obj.generate()
             objects = [untitled_obj,
-                       OBJ("assets/OBJ/Weapon/Shotgun/shotgun.obj", scale=[0.25, 0.25, 0.25],
+                       OBJ("assets/OBJ/Weapon/Shotgun/Shotgun.obj", scale=[0.25, 0.25, 0.25],
                            hitbox_size=[0.0, 0.0, 0.0],
                            rotation=[90.0, 0.0, 0.0])]
             player = Player(position=np.array([-109.50993, 0.0, 109.5]), hp=hp_max, ammo=ammo_max)
