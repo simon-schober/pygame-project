@@ -75,19 +75,20 @@ def render_text_and_image(screen_width, screen_height):
     render_2D_texture(hp_bar_field, 10, 10, screen_width, screen_height)
 
     # HP bar logic
-    hp_surface = pygame.Surface((320, 55), pygame.SRCALPHA)
+    surface_size = (335, 57)
+    hp_surface = pygame.Surface(surface_size, pygame.SRCALPHA)
     color = (
         (53, 211, 2) if player.hp > 155 else (254, 102, 5) if player.hp > 100 else (138, 5, 6) if player.hp > 45 else (
             70, 5, 5))
-    pygame.draw.rect(hp_surface, color, (0, 0, 320 * (player.hp / hp_max), 55))
-    render_2D_texture(hp_surface, 115
+    pygame.draw.rect(hp_surface, color, (0, 0, surface_size[0] * (player.hp / hp_max), surface_size[1]))
+    render_2D_texture(hp_surface, 103
                       , 100, screen_width, screen_height)
 
     # Bullet image
     bullet_pic = pygame.image.load("assets/Game/ammo-rifle.png").convert_alpha()
     bullet_width = int(screen_width * 0.1)
     bullet_height = int(bullet_pic.get_height() * bullet_width / bullet_pic.get_width())
-    bullet_pic = pygame.transform.smoothscale(bullet_pic, (bullet_width, bullet_height))
+    bullet_pic = pygame.transform.scale(bullet_pic, (bullet_width, bullet_height))
     render_2D_texture(bullet_pic, screen_width - 300, -10, screen_width, screen_height)
 
     crosshair = pygame.image.load('assets/Game/crosshair.png').convert_alpha()

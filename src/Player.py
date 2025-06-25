@@ -211,7 +211,10 @@ class Player:
             if e.type == MOUSEMOTION:
                 self.dx, self.dy = e.rel
                 self.rx -= self.dx
-                self.ry = 0.000000000001
+                if not self.flyhack:
+                    self.ry = 0.000000000001
+                else:
+                    self.ry -= clamp(self.dy, -90, 90)
             if e.type == KEYDOWN:
                 if dt - self.last_input_time > 10000:
                     self.godmode_sequence = []
