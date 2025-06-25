@@ -60,7 +60,7 @@ ammo_max = 100
 max_enemies = 1000
 
 # Create font for the HP bar
-hp_font = pygame.font.Font("assets/StartMenu/Font/BLKCHCRY.TTF", 145)
+hp_font = pygame.font.Font("assets/StartMenu/BLKCHCRY.TTF", 145)
 
 
 def render_text_and_image(screen_width, screen_height):
@@ -101,11 +101,11 @@ def render_text_and_image(screen_width, screen_height):
     hp_font_size = int((175 // (screen_height * 0.00078125)) / 2)
     bullet_font_size = int((100 // (screen_height * 0.00078125)) / 2)
 
-    hp_font = pygame.font.Font('assets/StartMenu/Font/BLKCHCRY.TTF', hp_font_size)
-    bullet_font = pygame.font.Font('assets/StartMenu/Font/BLKCHCRY.TTF', bullet_font_size)
+    hp_font = pygame.font.Font('assets/StartMenu/BLKCHCRY.TTF', hp_font_size)
+    bullet_font = pygame.font.Font('assets/StartMenu/BLKCHCRY.TTF', bullet_font_size)
 
     # HP text
-    text_surface = hp_font.render(f"{int(player.hp)}", True, (97, 93, 87))
+    text_surface = hp_font.render(f"{int(player.hp)}", True, (160, 160, 160))
     render_2D_texture(text_surface, 270, 140, screen_width, screen_height)
 
     # Ammo text

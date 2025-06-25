@@ -236,7 +236,7 @@ class Player:
                         self.raycast_shoot(enemies)
                         last_shoot = now
                     else:
-                        empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEmptySound')
+                        empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEmptySound.wav')
                         empty_sound.set_volume(1.0)
                         self.shoot_channel.play(empty_sound)
             except:
@@ -250,7 +250,7 @@ class Player:
                     last_shoot = now
                 elif (now - last_shoot > 250):
                     empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEmptySound.wav')
-                    empty_sound.set_volume(0.2)
+                    empty_sound.set_volume(1.0)
                     self.shoot_channel.play(empty_sound)
                     last_shoot = now
 
@@ -450,5 +450,5 @@ class Player:
                 self.ammo -= nachgeladen
             else:
                 empty_sound = pygame.mixer.Sound('assets/Sounds/WeaponEntirelyEmptySound.wav')
-                empty_sound.set_volume(0.7)
+                empty_sound.set_volume(1.0)
                 self.shoot_channel.play(empty_sound)
