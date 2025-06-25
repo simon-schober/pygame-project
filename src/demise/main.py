@@ -133,7 +133,7 @@ while True:
             untitled_obj = OBJ("assets/Model/Map/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
             untitled_obj.generate()
             objects = [untitled_obj,
-                       OBJ("assets/Model/Weapon/Shotgun/Shotgun.obj", scale=[0.25, 0.25, 0.25],
+                       OBJ("assets/Model/Weapon/Slingshot/Slingshot.obj", scale=[0.15, 0.15, 0.15],
                            hitbox_size=[0.0, 0.0, 0.0],
                            rotation=[90.0, 0.0, 0.0])]
             player = Player(position=np.array([-109.50993, 0.0, 109.5]), hp=hp_max, ammo=ammo_max)
