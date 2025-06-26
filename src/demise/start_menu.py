@@ -68,7 +68,7 @@ def option_menu(screen, screen_width, screen_height, option_lines):
     # Use the default pygame font, scale the size
     font = pygame.font.Font(None, int((60 // (screen_height * 0.00078125)) / 2))
     # Load a background picture for the menu and scale to the creen size
-    menu_bg_picture = pygame.image.load(r"../assets\StartMenu\Stone_Texture\Black_Stone.jpg")
+    menu_bg_picture = pygame.image.load("assets/2DTexture/StartMenu/OptionsBackground.png")
     menu_bg_picture = pygame.transform.scale(menu_bg_picture, (screen_width, screen_height))
 
     running_options = True
@@ -102,7 +102,7 @@ def credits_menu(screen, screen_width, screen_height, credits_lines):
     font_bold_underline.set_underline(True)
 
     # Load and scale the same background picture as options menu
-    menu_bg_picture = pygame.image.load(r"../assets\StartMenu\Stone_Texture\Black_Stone.jpg")
+    menu_bg_picture = pygame.image.load("assets/2DTexture/StartMenu/OptionsBackground.png")
     menu_bg_picture = pygame.transform.scale(menu_bg_picture, (screen_width, screen_height))
 
     running_credits = True
@@ -136,7 +136,7 @@ def make_start_menu(screen, Game_name, option_lines, credits_lines, scale, curre
     # Makes a new mouse texture
     mouse_texture = change_mouse_texture(screen_width)
     # Load and scale the background image for the start menu
-    start_bg_picture = pygame.image.load("assets/2DTexture/StartMenu/StartMenuBackground.jpeg")
+    start_bg_picture = pygame.image.load("assets/2DTexture/StartMenu/StartMenuBackground.png")
     start_bg_picture = pygame.transform.scale(start_bg_picture, (screen_width, screen_height))
 
     # Load buttons and the dark overlay
