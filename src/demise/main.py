@@ -133,17 +133,13 @@ while True:
             untitled_obj = OBJ("assets/Model/Map/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
             untitled_obj.generate()
             weapons = [OBJ("assets/Model/Weapon/Slingshot/Slingshot.obj", scale=[0.15, 0.15, 0.15],
-                           hitbox_size=[0.0, 0.0, 0.0],
-                           rotation=[0.0, 0.0, 0.0]),
-                       OBJ("assets/Model/Weapon/Revolver/Revolver.obj", scale=[0.15, 0.15, 0.15],
-                           hitbox_size=[0.0, 0.0, 0.0],
-                           rotation=[0.0, 0.0, 0.0]),
-                       OBJ("assets/Model/Weapon/Shotgun/Shotgun.obj", scale=[0.15, 0.15, 0.15],
-                           hitbox_size=[0.0, 0.0, 0.0],
-                           rotation=[0.0, 0.0, 0.0]),
-                       OBJ("assets/Model/Weapon/Minigun/Minigun.obj", scale=[0.15, 0.15, 0.15],
-                           hitbox_size=[0.0, 0.0, 0.0],
-                           rotation=[0.0, 0.0, 0.0])]
+                           hitbox_size=[0.0, 0.0, 0.0]),
+                       OBJ("assets/Model/Weapon/Shotgun/Shotgun.obj", scale=[0.25, 0.25, 0.25],  # Finished
+                           hitbox_size=[0.0, 0.0, 0.0]),
+                       OBJ("assets/Model/Weapon/Revolver/Revolver.obj", scale=[0.1, 0.1, 0.1],  # Finished
+                           hitbox_size=[0.0, 0.0, 0.0]),
+                       OBJ("assets/Model/Weapon/Minigun/Mini_gun.obj", scale=[1.5, 1.5, 1.5]
+                           , hitbox_size=[0.0, 0.0, 0.0])]
             objects = [untitled_obj, weapons[0]]
             player = Player(position=np.array([-109.50993, 0.0, 109.5]), hp=hp_max, ammo=ammo_max)
             hitboxes_map = [
@@ -195,11 +191,17 @@ while True:
         if current_time - last_spawn_time >= spawn_interval and len(enemies) < max_enemies:
             enemy = Enemy(
                 "assets/Model/Enemy/Enemy.obj",
-                position=(
-                    np.random.uniform(hitboxes_map[2].position[0], hitboxes_map[3].position[0]),
+                position=np.array([
+                    np.random.uniform(
+                        hitboxes_map[2].position[0].copy() - hitboxes_map[2].size[0].copy() / 2,
+                        hitboxes_map[3].position[0].copy() + hitboxes_map[3].size[0].copy() / 2
+                    ),
                     0,
-                    np.random.uniform(hitboxes_map[0].position[2], hitboxes_map[1].position[2]),
-                )
+                    np.random.uniform(
+                        hitboxes_map[0].position[2].copy() - hitboxes_map[0].size[2].copy() / 2,
+                        hitboxes_map[1].position[2].copy() + hitboxes_map[1].size[2].copy() / 2
+                    ),
+                ])
             )
             enemy.generate()
             enemies.append(enemy)
