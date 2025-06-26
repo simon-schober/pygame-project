@@ -135,7 +135,7 @@ class Player:
         self.end = False
         self.decke_blockiert = False
         self.kann_springen = True
-        self.weapon_type = "instant"
+        self.weapon_type = "cooldown"
 
     def compute_cam_direction(self, gun):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
@@ -388,7 +388,7 @@ class Player:
         self.hitbox.position = self.position
         vor_offset = -2
         rechts_offset = -1.5
-        unten_offset = -0.7
+        unten_offset = -2
         gun.position = [
             self.position[0] + self.direction[0] * vor_offset + self.right[0] * rechts_offset + self.up[
                 0] * unten_offset,
