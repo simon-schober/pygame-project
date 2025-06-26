@@ -138,6 +138,8 @@ class Player:
         self.decke_blockiert = False
         self.kann_springen = True
         self.weapon_type = "cooldown"
+        self.bodycount = 0
+        self.cooldown = 1000  # Zeit bis zum nächsten Schuss (in Sekunden oder Ticks)
 
     def compute_cam_direction(self, gun):
         """Berechnet die Kamerarichtung und aktualisiert die Waffe."""
@@ -231,7 +233,7 @@ class Player:
         now = pygame.time.get_ticks()
         if self.weapon_type == "cooldown":
             try:
-                if e.type == MOUSEBUTTONDOWN and e.button == 1 and now - last_shoot > 500:
+                if e.type == MOUSEBUTTONDOWN and e.button == 1 and now - last_shoot > self.cooldown:
                     if (self.mag_ammo == "∞" or self.mag_ammo > 0):
                         self.raycast_shoot(enemies)
                         last_shoot = now
@@ -245,7 +247,7 @@ class Player:
             mouse_buttons = pygame.mouse.get_pressed()
             if mouse_buttons[0]:
                 now = pygame.time.get_ticks()
-                if (self.mag_ammo == "∞" or self.mag_ammo > 0) and (now - last_shoot > 150):
+                if (self.mag_ammo == "∞" or self.mag_ammo > 0) and (now - last_shoot > self.cooldown):
                     self.raycast_shoot(enemies)
                     last_shoot = now
                 elif (now - last_shoot > 250):
@@ -427,7 +429,7 @@ class Player:
             s = (self.life_time // 1000) % 60
             m = (s // 60) % 60
             h = m // 60
-            life = life_font.render(f'Time you survived:', True,
+            life = life_font.render(f'You lasted:', True,
                                     (132, 8, 0))
             life_time = life_font.render(f'{h:02}:{m:02}:{s:02}', True, (132, 8, 0))
             render_2D_texture(life, screen_width // 2 - ((life.get_width() // 2) * 2), screen_height // 2 - 100,

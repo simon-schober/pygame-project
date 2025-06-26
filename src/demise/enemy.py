@@ -9,7 +9,7 @@ from obj import OBJ
 class Enemy(OBJ):
     def __init__(self, filename, move_speed=10, gravity=1, position=np.zeros(3), rotation=np.zeros(3),
                  scale=np.ones(3), hitbox_size=np.array([3.0, 3.0, 3.0]),
-                 hp=1, damage=1.0, swapyz=False):
+                 hp=3, damage=1.0, swapyz=False):
         super().__init__(filename, position, rotation, scale, hitbox_size, swapyz)
         self.gravity = gravity
         self.move_speed = move_speed
@@ -58,9 +58,11 @@ class Enemy(OBJ):
                     except:
                         print("Fuck")
 
-    def kill_if_dead(self, enemies, player):
+    def kill_if_dead(self, enemies):
         if not self.hp:
             enemies.remove(self)
+            return True
+        return False
 
     def update_positions(self):
         self.hitbox.position = self.position

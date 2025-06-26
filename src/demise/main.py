@@ -132,10 +132,19 @@ while True:
             enemies = [Enemy("assets/Model/Enemy/Enemy.obj")]
             untitled_obj = OBJ("assets/Model/Map/Map.obj", scale=[1.0, 1.0, 1.0], position=[0, -10.0, 0])
             untitled_obj.generate()
-            objects = [untitled_obj,
-                       OBJ("assets/Model/Weapon/Slingshot/Slingshot.obj", scale=[0.15, 0.15, 0.15],
+            weapons = [OBJ("assets/Model/Weapon/Slingshot/Slingshot.obj", scale=[0.15, 0.15, 0.15],
                            hitbox_size=[0.0, 0.0, 0.0],
-                           rotation=[90.0, 0.0, 0.0])]
+                           rotation=[0.0, 0.0, 0.0]),
+                       OBJ("assets/Model/Weapon/Revolver/Revolver.obj", scale=[0.15, 0.15, 0.15],
+                           hitbox_size=[0.0, 0.0, 0.0],
+                           rotation=[0.0, 0.0, 0.0]),
+                       OBJ("assets/Model/Weapon/Shotgun/Shotgun.obj", scale=[0.15, 0.15, 0.15],
+                           hitbox_size=[0.0, 0.0, 0.0],
+                           rotation=[0.0, 0.0, 0.0]),
+                       OBJ("assets/Model/Weapon/Minigun/Minigun.obj", scale=[0.15, 0.15, 0.15],
+                           hitbox_size=[0.0, 0.0, 0.0],
+                           rotation=[0.0, 0.0, 0.0])]
+            objects = [untitled_obj, weapons[0]]
             player = Player(position=np.array([-109.50993, 0.0, 109.5]), hp=hp_max, ammo=ammo_max)
             hitboxes_map = [
                 Hitbox(position=np.array([-193.237, 10.0756, 112.126]), size=np.array([23.687, 60.6338, 175.9088])),
@@ -196,11 +205,12 @@ while True:
             enemies.append(enemy)
             last_spawn_time = current_time
 
+        death_list = []
         for enemy in enemies:
             enemy.move_to_target(player, hitboxes_map, dt)
             enemy.rotate_to_target(player.position)
             enemy.apply_gravity(objects, dt, player)
-            enemy.kill_if_dead(enemies, player)
+            death_list.append(enemy.kill_if_dead(enemies))
             if player.hitbox_cheat:
                 enemy.hitbox.draw_hitbox((10.0, 10.0, 10.0))
             enemy.render()
@@ -214,6 +224,20 @@ while True:
                     _object.hitbox.draw_hitbox((1.0, 1.0, 1.0))
             if hasattr(_object, "render"):
                 _object.render()
+
+        if death_list != [False for i in range(len(enemies))]:
+            player.bodycount += 1
+            player.ammo = 100
+            weapon_id = (player.bodycount // 3) % 4
+            objects[1] = weapons[weapon_id]
+            if weapon_id < 3:
+                player.weapon_type = "cooldown"
+                player.damage = weapon_id * 1.5
+                player.cooldown = (weapon_id + 1) * 100
+            else:
+                player.weapon_type = "instant"
+                player.cooldown = 150
+                player.damage = 0.5
 
         # Setup 2D projection für Overlay
         glMatrixMode(GL_PROJECTION)
