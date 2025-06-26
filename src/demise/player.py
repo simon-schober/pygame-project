@@ -10,7 +10,6 @@ from copy import copy
 
 from pygame import *
 
-from hitbox import Hitbox
 from obj import *
 
 
@@ -229,7 +228,7 @@ class Player:
         if self.weapon_type == "cooldown":
             try:
                 if e.type == MOUSEBUTTONDOWN and e.button == 1 and now - last_shoot > self.cooldown:
-                    if (self.mag_ammo == "∞" or self.mag_ammo > 0):
+                    if self.mag_ammo == "∞" or self.mag_ammo > 0:
                         self.raycast_shoot(enemies)
                         last_shoot = now
                     else:
