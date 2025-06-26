@@ -12,6 +12,7 @@ import numpy as np
 import pygame
 from OpenGL.GL import *
 from pygame import *
+from obj import *
 
 from hitbox import Hitbox
 
@@ -129,9 +130,6 @@ class Player:
         self.mag_ammo_bevore = self.mag_ammo
         self.ammo_bevore = self.ammo
         self.jump_strength = 1.3
-        self.gun_spin_angle = 0
-        self.gun_spin_speed = 720
-        self.gun_spin_current = 0
         self.on_ground = False
         self.mode = False
         self.end = False
@@ -456,3 +454,51 @@ class Player:
                 empty_sound = pygame.mixer.Sound('assets/Sound/WeaponEntirelyEmptySound.wav')
                 empty_sound.set_volume(1.0)
                 self.shoot_channel.play(empty_sound)
+
+def change_weapon(self):
+        if self.kills <= 20:
+            self.which_weapon = [1]
+            self.weapon_type = "cooldown"
+            if self.kills == 1:
+                self.mag_size = 7
+                self.mag_ammo = 7
+                self.ammo = 61
+                self.reserve_ammo = self.ammo - self.mag_size
+                self.enemy_hp = 2
+        elif self.kills <= 60:
+            self.which_weapon = "assets/Model/Weapon/Revolver/Revolver.obj"
+            self.weapon_type = "cooldown"
+            if self.kills == 21:
+                self.mag_size = 12
+                self.mag_ammo = 12
+                self.ammo = 111
+                self.reserve_ammo = self.ammo - self.mag_size
+                self.enemy_hp = 2
+        elif self.kills <= 140:
+            self.which_weapon = "assets/Model/Weapon/Shotgun/Shotgun.obj"
+            self.weapon_type = "cooldown"
+            if self.kills == 61:
+                self.mag_size = 6
+                self.mag_ammo = 6
+                self.ammo = 90
+                self.enemy_hp = 1
+                self.reserve_ammo = self.ammo - self.mag_size
+        elif self.kills <= 200:
+            self.which_weapon = "assets/Model/Weapon/Minigun/Mini_gun.obj"
+            self.weapon_type = "instant"
+            if self.kills == 141:
+                self.mag_size = 33
+                self.mag_ammo = 33
+                self.ammo = 305
+                self.enemy_hp = 1
+                self.reserve_ammo = self.ammo - self.mag_size
+        elif self.kills > 500:
+            self.mode = True
+            self.god_mode()
+        if self.which_weapon != self.gun_rn:
+            self.gun_obj.free()
+            self.gun_obj = OBJ(self.which_weapon, scale=[0.15, 0.15, 0.15],
+                               hitbox_size=[0.0, 0.0, 0.0],
+                               rotation=[90.0, 0.0, 0.0])
+            self.gun_obj.generate()
+            self.gun_rn = self.which_weapon
